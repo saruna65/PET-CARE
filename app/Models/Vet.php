@@ -33,7 +33,8 @@ class Vet extends Model
         'consultation_fee',
         'image_path',
         'is_available',
-        'availability_hours'
+        'availability_hours',
+        'is_verified'
     ];
 
     /**
@@ -44,9 +45,10 @@ class Vet extends Model
     protected $casts = [
         'experience_years' => 'integer',
         'is_available' => 'boolean',
-        'consultation_fee' => 'decimal:2',
-        'services_offered' => 'json',
-        'availability_hours' => 'json',
+        'is_verified' => 'boolean',
+        'services_offered' => 'array',
+        'availability_hours' => 'array',
+        'consultation_fee' => 'float'
     ];
 
     /**
@@ -58,45 +60,35 @@ class Vet extends Model
     }
 
     /**
-     * Get the appointments for the vet.
-     */
-    
-
-    /**
-     * Get the image URL attribute.
-     *
-     * @return string
+     * Get the image URL.
      */
     public function getImageUrlAttribute(): string
     {
         if ($this->image_path) {
             return asset('storage/' . $this->image_path);
         }
-        return asset('images/default-vet-profile.jpg');
+        
+        return asset('images/default-vet.png');
     }
 
     /**
-     * Get the formatted availability hours.
-     *
-     * @return array
+     * Get formatted availability.
      */
     public function getFormattedAvailabilityAttribute(): array
     {
-        $days = [
-            'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'
-        ];
+        $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        $formattedAvailability = [];
         
-        $availability = $this->availability_hours ?? [];
-        $formatted = [];
-        
-        foreach ($days as $day) {
-            $formatted[$day] = [
-                'available' => isset($availability[$day]) && $availability[$day]['available'] ?? false,
-                'start_time' => $availability[$day]['start_time'] ?? '09:00',
-                'end_time' => $availability[$day]['end_time'] ?? '17:00',
-            ];
+        if ($this->availability_hours) {
+            foreach ($days as $day) {
+                $formattedAvailability[$day] = $this->availability_hours[$day] ?? 'Not Available';
+            }
+        } else {
+            foreach ($days as $day) {
+                $formattedAvailability[$day] = 'Not Available';
+            }
         }
         
-        return $formatted;
+        return $formattedAvailability;
     }
 }
