@@ -1,0 +1,329 @@
+<?php
+
+
+namespace App\Http\Controllers;
+
+use App\Models\Pet;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
+
+class PetController extends Controller
+{
+    /**
+     * Display a listing of the user's pets.
+     */
+    public function index(): View
+    {
+        $pets = Pet::where('user_id', Auth::id())->get();
+        return view('pets.index', compact('pets'));
+    }
+
+    /**
+     * Show the form for creating a new pet.
+     */
+    public function create(): View
+    {
+        return view('pets.create');
+    }
+
+    /**
+     * Store a newly created pet in storage.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'pet_name' => 'required|string|max:255',
+            'pet_type' => 'required|string|max:255',
+            'pet_breed' => 'required|string|max:255',
+            'age' => 'required|integer|min:0|max:100',
+            'sex' => 'required|in:male,female',
+            'allergies' => 'nullable|string',
+            'pet_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        $validated['user_id'] = Auth::id();
+
+        // Handle image upload if provided
+        if ($request->hasFile('pet_image')) {
+            $path = $request->file('pet_image')->store('pets', 'public');
+            $validated['image_path'] = $path;
+        }
+
+        Pet::create($validated);
+
+        return redirect()->route('pet.profile')
+            ->with('success', 'Pet profile created successfully.');
+    }
+
+    /**
+     * Show the form for editing the specified pet.
+     */
+    public function edit(string $id): View|RedirectResponse
+    {
+        $pet = Pet::where('user_id', Auth::id())->findOrFail($id);
+        return view('pets.edit', compact('pet'));
+    }
+
+    /**
+     * Update the specified pet in storage.
+     */
+    public function update(Request $request, string $id): RedirectResponse
+    {
+        $pet = Pet::where('user_id', Auth::id())->findOrFail($id);
+        
+        $validated = $request->validate([
+            'pet_name' => 'required|string|max:255',
+            'pet_type' => 'required|string|max:255',
+            'pet_breed' => 'required|string|max:255',
+            'age' => 'required|integer|min:0|max:100',
+            'sex' => 'required|in:male,female',
+            'allergies' => 'nullable|string',
+            'pet_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ]);
+
+        // Handle image upload if provided
+        if ($request->hasFile('pet_image')) {
+            // Delete old image if it exists
+            if ($pet->image_path && Storage::disk('public')->exists($pet->image_path)) {
+                Storage::disk('public')->delete($pet->image_path);
+            }
+            
+            $path = $request->file('pet_image')->store('pets', 'public');
+            $validated['image_path'] = $path;
+        }
+
+        $pet->update($validated);
+
+        return redirect()->route('pet.profile')
+            ->with('success', 'Pet profile updated successfully.');
+    }
+
+    /**
+     * Remove the specified pet from storage.
+     */
+    public function destroy(string $id): RedirectResponse
+    {
+        $pet = Pet::where('user_id', Auth::id())->findOrFail($id);
+        
+        // Delete associated image if it exists
+        if ($pet->image_path && Storage::disk('public')->exists($pet->image_path)) {
+            Storage::disk('public')->delete($pet->image_path);
+        }
+        
+        $pet->delete();
+
+        return redirect()->route('pet.profile')
+            ->with('success', 'Pet profile deleted successfully.');
+    }
+   
+    /**
+     * Display the specified pet.
+     */
+    public function show(string $id): View
+{
+    $pet = Pet::where('user_id', Auth::id())->findOrFail($id);
+    
+    // Get recent disease detections for this pet (limited to 3)
+    $diseaseDetections = \App\Models\DiseaseDetection::where('pet_id', $pet->id)
+        ->orderBy('created_at', 'desc')
+        ->paginate(3);
+    
+    return view('pets.show', compact('pet', 'diseaseDetections'));
+}
+
+/**
+ * Analyze disease from uploaded image and show results.
+ */
+
+/**
+ * Analyze disease from uploaded image and show results.
+ */
+public function analyzeDisease(Request $request, string $id): View
+{
+    // Validate the uploaded image
+    $request->validate([
+        'disease_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+    ]);
+
+    // Find the pet
+    $pet = Pet::where('user_id', Auth::id())->findOrFail($id);
+    
+    // Store the uploaded image
+    $uploadedImage = $request->file('disease_image')->store('disease-images', 'public');
+    $uploadedDate = now()->format('F j, Y \a\t g:i A');
+    
+    // Here we would normally call the TensorFlow model API
+    // For this example, let's simulate some predictions
+    $predictions = [
+        ['className' => 'Bacterial dermatosis', 'probability' => 0.75],
+        ['className' => 'Fungal Infections', 'probability' => 0.15],
+        ['className' => 'Hypersensivity Allergic dermatosis', 'probability' => 0.08],
+        ['className' => 'Healthy', 'probability' => 0.02],
+    ];
+    
+    // Get the highest probability prediction for recommendation
+    $highestPrediction = collect($predictions)->sortByDesc('probability')->first();
+    $recommendationHtml = null;
+    
+    // Recommendations database - same as dashboard
+    $recommendations = [
+        "Hypersensivity Allergic dermatosis" => '
+            <div class="text-red-800 font-medium mb-2">Hypersensitivity/Allergic Dermatosis Detected</div>
+            <p class="mb-2">Your pet appears to have signs of allergic dermatosis. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Schedule a veterinary visit as soon as possible to confirm diagnosis</li>
+                <li>Try to identify and remove potential allergens from your pet\'s environment</li>
+                <li>Consider hypoallergenic pet food recommended by your veterinarian</li>
+                <li>Avoid using harsh chemical cleaners around your home</li>
+                <li>Regular bathing with vet-recommended medicated shampoo may help</li>
+                <li>Do not use human medications without veterinary guidance</li>
+            </ul>
+        ',
+        "Fungal Infections" => '
+            <div class="text-red-800 font-medium mb-2">Fungal Infection Detected</div>
+            <p class="mb-2">Your pet appears to have signs of a fungal infection. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Visit your veterinarian for proper diagnosis and treatment</li>
+                <li>Keep the affected areas clean and dry</li>
+                <li>Your vet may prescribe antifungal medications, shampoos or creams</li>
+                <li>Follow the complete treatment course, even if symptoms improve</li>
+                <li>Disinfect bedding, brushes and other items your pet frequently uses</li>
+                <li>Some fungal infections can spread to humans, so practice good hygiene</li>
+                <li>Consider isolating your pet from other animals until the infection clears</li>
+            </ul>
+        ',
+        "Bacterial dermatosis" => '
+            <div class="text-red-800 font-medium mb-2">Bacterial Dermatosis Detected</div>
+            <p class="mb-2">Your pet appears to have signs of bacterial skin infection. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Consult with your veterinarian for proper diagnosis and treatment</li>
+                <li>Antibiotics are typically needed and must be prescribed by a professional</li>
+                <li>Keep the affected area clean using a gentle antiseptic solution recommended by your vet</li>
+                <li>Prevent your pet from scratching, licking, or biting the affected areas</li>
+                <li>Complete the full course of antibiotics even if symptoms improve</li>
+                <li>Check for underlying causes like allergies or parasites</li>
+                <li>Regular bathing with medicated shampoos may be recommended</li>
+            </ul>
+        ',
+        "Healthy" => '
+            <div class="text-green-800 font-medium mb-2">No Issues Detected - Healthy Skin</div>
+            <p class="mb-2">Great news! Your pet\'s skin appears healthy. Here are some tips to maintain skin health:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Continue regular grooming and bathing with pet-appropriate products</li>
+                <li>Maintain a balanced diet with proper nutrition</li>
+                <li>Schedule regular check-ups with your veterinarian</li>
+                <li>Use parasite prevention as recommended by your vet</li>
+                <li>Monitor for any changes in skin appearance or behavior</li>
+                <li>Provide fresh water and a clean living environment</li>
+            </ul>
+        '
+    ];
+    
+    if ($highestPrediction && isset($recommendations[$highestPrediction['className']])) {
+        $recommendationHtml = $recommendations[$highestPrediction['className']];
+    }
+    
+    // Save the results to the database
+    $diseaseDetection = new \App\Models\DiseaseDetection([
+        'pet_id' => $pet->id,
+        'user_id' => Auth::id(),
+        'image_path' => $uploadedImage,
+        'results' => $predictions,
+        'primary_diagnosis' => $highestPrediction['className'],
+        'confidence_score' => $highestPrediction['probability']
+    ]);
+    $diseaseDetection->save();
+    
+    return view('pets.disease-results', compact(
+        'pet', 
+        'uploadedImage', 
+        'uploadedDate', 
+        'predictions', 
+        'recommendationHtml',
+        'diseaseDetection'
+    ));
+}
+/**
+ * Get detection details as JSON for the modal
+ */
+public function getDetectionDetails(string $petId, string $detectionId)
+{
+    $pet = Pet::where('user_id', Auth::id())->findOrFail($petId);
+    $detection = \App\Models\DiseaseDetection::where('pet_id', $pet->id)
+        ->findOrFail($detectionId);
+    
+    // Recommendations database - same as analyzeDisease
+    $recommendations = [
+        "Hypersensivity Allergic dermatosis" => '
+            <div class="text-red-800 font-medium mb-2">Hypersensitivity/Allergic Dermatosis Detected</div>
+            <p class="mb-2">Your pet appears to have signs of allergic dermatosis. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Schedule a veterinary visit as soon as possible to confirm diagnosis</li>
+                <li>Try to identify and remove potential allergens from your pet\'s environment</li>
+                <li>Consider hypoallergenic pet food recommended by your veterinarian</li>
+                <li>Avoid using harsh chemical cleaners around your home</li>
+                <li>Regular bathing with vet-recommended medicated shampoo may help</li>
+                <li>Do not use human medications without veterinary guidance</li>
+            </ul>
+        ',
+        "Fungal Infections" => '
+            <div class="text-red-800 font-medium mb-2">Fungal Infection Detected</div>
+            <p class="mb-2">Your pet appears to have signs of a fungal infection. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Visit your veterinarian for proper diagnosis and treatment</li>
+                <li>Keep the affected areas clean and dry</li>
+                <li>Your vet may prescribe antifungal medications, shampoos or creams</li>
+                <li>Follow the complete treatment course, even if symptoms improve</li>
+                <li>Disinfect bedding, brushes and other items your pet frequently uses</li>
+                <li>Some fungal infections can spread to humans, so practice good hygiene</li>
+                <li>Consider isolating your pet from other animals until the infection clears</li>
+            </ul>
+        ',
+        "Bacterial dermatosis" => '
+            <div class="text-red-800 font-medium mb-2">Bacterial Dermatosis Detected</div>
+            <p class="mb-2">Your pet appears to have signs of bacterial skin infection. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Consult with your veterinarian for proper diagnosis and treatment</li>
+                <li>Antibiotics are typically needed and must be prescribed by a professional</li>
+                <li>Keep the affected area clean using a gentle antiseptic solution recommended by your vet</li>
+                <li>Prevent your pet from scratching, licking, or biting the affected areas</li>
+                <li>Complete the full course of antibiotics even if symptoms improve</li>
+                <li>Check for underlying causes like allergies or parasites</li>
+                <li>Regular bathing with medicated shampoos may be recommended</li>
+            </ul>
+        ',
+        "Healthy" => '
+            <div class="text-green-800 font-medium mb-2">No Issues Detected - Healthy Skin</div>
+            <p class="mb-2">Great news! Your pet\'s skin appears healthy. Here are some tips to maintain skin health:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Continue regular grooming and bathing with pet-appropriate products</li>
+                <li>Maintain a balanced diet with proper nutrition</li>
+                <li>Schedule regular check-ups with your veterinarian</li>
+                <li>Use parasite prevention as recommended by your vet</li>
+                <li>Monitor for any changes in skin appearance or behavior</li>
+                <li>Provide fresh water and a clean living environment</li>
+            </ul>
+        '
+    ];
+    
+    $recommendationHtml = null;
+    if (isset($recommendations[$detection->primary_diagnosis])) {
+        $recommendationHtml = $recommendations[$detection->primary_diagnosis];
+    }
+    
+    // Return detection data as JSON
+    return response()->json([
+        'id' => $detection->id,
+        'pet_id' => $detection->pet_id,
+        'primary_diagnosis' => $detection->primary_diagnosis,
+        'confidence_score' => $detection->confidence_score,
+        'results' => $detection->results,
+        'image_url' => asset('storage/' . $detection->image_path),
+        'created_at' => $detection->created_at,
+        'recommendation_html' => $recommendationHtml
+    ]);
+}
+}

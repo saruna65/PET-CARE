@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role', // Add role to fillable
     ];
 
     /**
@@ -44,5 +45,51 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    
+    /**
+     * Get the disease detections for the user.
+     */
+    public function diseaseDetections()
+    {
+        return $this->hasMany(DiseaseDetection::class);
+    }
+    
+    /**
+     * Check if the user is a pet owner.
+     *
+     * @return bool
+     */
+    public function isPetOwner(): bool
+    {
+        return $this->role === 'pet_owner';
+    }
+
+    /**
+     * Check if the user is a veterinarian.
+     *
+     * @return bool
+     */
+    public function isVet(): bool
+    {
+        return $this->role === 'vet';
+    }
+
+    /**
+     * Check if the user is an admin.
+     *
+     * @return bool
+     */
+    public function isAdmin(): bool
+    {
+        return $this->role === 'admin';
+    }
+
+    /**
+     * Get the vet profile associated with the user.
+     */
+    public function vetProfile()
+    {
+        return $this->hasOne(Vet::class);
     }
 }
