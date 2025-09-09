@@ -118,6 +118,26 @@
                         </div>
                     </div>
                     
+                    <!-- Add this right after the Recommendations Section, before Action Buttons -->
+                    @if(isset($sentToVet) && $sentToVet)
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-5 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-indigo-800 font-medium text-lg">Sent to Veterinarians</h3>
+                                        <p class="text-indigo-600">This case has been sent to our veterinarian network for review.</p>
+                                        @if(isset($detectionReason))
+                                            <p class="text-indigo-600 mt-1 text-sm"><strong>Reason:</strong> {{ $detectionReason }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                     <!-- Action Buttons -->
                     <div class="mt-8 flex flex-wrap gap-4 justify-between">
                         <a href="{{ route('pet.show', $pet->id) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition duration-300">

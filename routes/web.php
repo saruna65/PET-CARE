@@ -42,27 +42,35 @@ Route::middleware('auth')->group(function () {
         // Routes for regular users to register as vets
         Route::get('/register/form', [VetController::class, 'registerForm'])->name('become.vet.form');
         Route::post('/register/submit', [VetController::class, 'registerSubmit'])->name('become.vet.submit');
-        
-        // Vet-only routes (accessible only to users with the 'vet' role)
-        Route::middleware('role:vet')->group(function () {
-            Route::get('/dashboard', [VetController::class, 'dashboard'])->name('vet.dashboard');
-            Route::get('/profile/edit', [VetController::class, 'editProfile'])->name('vet.edit.profile');
-            Route::post('/profile/update', [VetController::class, 'updateProfile'])->name('vet.update.profile');
-        });
-        
-        // Admin-only routes (accessible only to users with the 'admin' role)
-        Route::middleware('role:admin')->group(function () {
-            Route::get('/create', [VetController::class, 'create'])->name('vet.create');
-            Route::post('/', [VetController::class, 'store'])->name('vet.store');
-            Route::get('/{id}/edit', [VetController::class, 'edit'])->name('vet.edit');
-            Route::put('/{id}', [VetController::class, 'update'])->name('vet.update');
-            Route::delete('/{id}', [VetController::class, 'destroy'])->name('vet.destroy');
-            
-            // Create new user and vet profile together (admin only)
-            Route::get('/create-with-user', [VetController::class, 'createWithUser'])->name('vet.create.with.user');
-            Route::post('/store-with-user', [VetController::class, 'storeWithUser'])->name('vet.store.with.user');
-        });
     });
+    
+// Inside your vet middleware group
+Route::middleware('role:vet')->group(function () {
+    Route::get('/vet/dashboard', [VetController::class, 'dashboard'])->name('vet.dashboard');
+    Route::get('/vet/profile/edit', [VetController::class, 'editProfile'])->name('vet.edit.profile');
+    Route::post('/vet/profile/update', [VetController::class, 'updateProfile'])->name('vet.update.profile');
+    
+    // Add these new routes for the vet diseases functionality
+    Route::get('/vet/diseases', [VetController::class, 'allDiseases'])->name('vet.diseases');
+    Route::get('/vet/disease/{id}', [VetController::class, 'getDiseaseDetails'])->name('vet.disease-details');
+    Route::post('/vet/disease/{id}/review', [VetController::class, 'markDiseaseReviewed'])->name('vet.mark-reviewed');
+});
+    
+    // Admin-only routes
+    Route::middleware('role:admin')->prefix('admin')->group(function () {
+        Route::get('/vets/create', [VetController::class, 'create'])->name('vet.create');
+        Route::post('/vets', [VetController::class, 'store'])->name('vet.store');
+        Route::get('/vets/{id}/edit', [VetController::class, 'edit'])->name('vet.edit');
+        Route::put('/vets/{id}', [VetController::class, 'update'])->name('vet.update');
+        Route::delete('/vets/{id}', [VetController::class, 'destroy'])->name('vet.destroy');
+        
+        // Create new user and vet profile together (admin only)
+        Route::get('/vets/create-with-user', [VetController::class, 'createWithUser'])->name('vet.create.with.user');
+        Route::post('/vets/store-with-user', [VetController::class, 'storeWithUser'])->name('vet.store.with.user');
+
+        
+    });
+
 });
 
 require __DIR__.'/auth.php';
