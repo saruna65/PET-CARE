@@ -17,7 +17,14 @@ class VetDisease extends Model
         'confidence_score',
         'results',
         'is_reviewed',
-        'detection_reason'
+        'detection_reason',
+        // New fields for vet review
+        'vet_diagnosis',
+        'vet_treatment',
+        'vet_notes',
+        'is_critical',
+        'reviewed_at',
+        'reviewed_by'
     ];
 
     /**
@@ -29,6 +36,8 @@ class VetDisease extends Model
         'results' => 'array',
         'confidence_score' => 'float',
         'is_reviewed' => 'boolean',
+        'is_critical' => 'boolean',
+        'reviewed_at' => 'datetime',
     ];
 
     /**
@@ -45,5 +54,13 @@ class VetDisease extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+    
+    /**
+     * Get the vet who reviewed this case
+     */
+    public function reviewer()
+    {
+        return $this->belongsTo(User::class, 'reviewed_by');
     }
 }

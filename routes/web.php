@@ -32,7 +32,10 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/pets/detail/{pet}', [DashboardController::class, 'details'])->name('pet.details');
     Route::get('/pets/list', [DashboardController::class, 'index'])->name('pets.index');
-    
+
+// Add this route inside the middleware('auth')->group(function ()
+Route::get('/pet/{petId}/vet-disease/{diseaseId}/details', [PetController::class, 'getVetDiseaseDetails'])->name('vet-disease.details');
+Route::get('/pet/{petId}/vet-disease/{diseaseId}/print', [PetController::class, 'printVetDisease'])->name('vet-disease.print');
     // Vet routes
     Route::prefix('vets')->group(function () {
         // Public vet routes (accessible to all authenticated users)
@@ -54,6 +57,9 @@ Route::middleware('role:vet')->group(function () {
     Route::get('/vet/diseases', [VetController::class, 'allDiseases'])->name('vet.diseases');
     Route::get('/vet/disease/{id}', [VetController::class, 'getDiseaseDetails'])->name('vet.disease-details');
     Route::post('/vet/disease/{id}/review', [VetController::class, 'markDiseaseReviewed'])->name('vet.mark-reviewed');
+    // New routes for detailed disease view and review submission
+    Route::get('/vet/disease/{id}/view', [VetController::class, 'viewDisease'])->name('vet.disease.view');
+    Route::post('/vet/disease/{id}/submit-review', [VetController::class, 'submitReview'])->name('vet.disease.submit-review');
 });
     
     // Admin-only routes
@@ -70,7 +76,6 @@ Route::middleware('role:vet')->group(function () {
 
         
     });
-
 });
 
 require __DIR__.'/auth.php';

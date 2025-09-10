@@ -119,10 +119,11 @@ class PetController extends Controller
             ->with('success', 'Pet profile deleted successfully.');
     }
    
-    /**
-     * Display the specified pet.
-     */
-    public function show(string $id): View
+    
+/**
+ * Display the specified pet.
+ */
+public function show(string $id): View
 {
     $pet = Pet::where('user_id', Auth::id())->findOrFail($id);
     
@@ -131,7 +132,12 @@ class PetController extends Controller
         ->orderBy('created_at', 'desc')
         ->paginate(3);
     
-    return view('pets.show', compact('pet', 'diseaseDetections'));
+    // Get vet disease detections for this pet (limited to 3)
+    $vetDiseases = \App\Models\VetDisease::where('pet_id', $pet->id)
+        ->orderBy('created_at', 'desc')
+        ->paginate(3);
+    
+    return view('pets.show', compact('pet', 'diseaseDetections', 'vetDiseases'));
 }
 
 /**
@@ -165,7 +171,7 @@ public function analyzeDisease(Request $request, string $id): View
     $highestPrediction = collect($predictions)->sortByDesc('probability')->first();
     $recommendationHtml = null;
     
-    // Recommendations database
+    // Recommendations database - same as dashboard
     $recommendations = [
         "Hypersensivity Allergic dermatosis" => '
             <div class="text-red-800 font-medium mb-2">Hypersensitivity/Allergic Dermatosis Detected</div>
@@ -205,13 +211,25 @@ public function analyzeDisease(Request $request, string $id): View
                 <li>Regular bathing with medicated shampoos may be recommended</li>
             </ul>
         ',
+        "Healthy" => '
+            <div class="text-green-800 font-medium mb-2">No Issues Detected - Healthy Skin</div>
+            <p class="mb-2">Great news! Your pet\'s skin appears healthy. Here are some tips to maintain skin health:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Continue regular grooming and bathing with pet-appropriate products</li>
+                <li>Maintain a balanced diet with proper nutrition</li>
+                <li>Schedule regular check-ups with your veterinarian</li>
+                <li>Use parasite prevention as recommended by your vet</li>
+                <li>Monitor for any changes in skin appearance or behavior</li>
+                <li>Provide fresh water and a clean living environment</li>
+            </ul>
+        '
     ];
     
     if ($highestPrediction && isset($recommendations[$highestPrediction['className']])) {
         $recommendationHtml = $recommendations[$highestPrediction['className']];
     }
     
-    // Save the results to the disease_detections table
+    // Save the results to the database
     $diseaseDetection = new \App\Models\DiseaseDetection([
         'pet_id' => $pet->id,
         'user_id' => Auth::id(),
@@ -222,77 +240,13 @@ public function analyzeDisease(Request $request, string $id): View
     ]);
     $diseaseDetection->save();
     
-    // Check if this detection should be stored for vets based on conditions
-    $sentToVet = false;
-    $detectionReason = null;
-    
-    // Extract data needed for condition checks
-    $highestDiseaseProbability = 0;
-    $highestDiseaseName = '';
-    $diseasesAbove20Percent = [];
-    $healthyProbability = 0;
-    
-    foreach ($predictions as $prediction) {
-        $className = $prediction['className'];
-        $probability = $prediction['probability'];
-        
-        if ($className === 'Healthy') {
-            $healthyProbability = $probability;
-        } else {
-            // Track highest disease probability
-            if ($probability > $highestDiseaseProbability) {
-                $highestDiseaseProbability = $probability;
-                $highestDiseaseName = $className;
-            }
-            
-            // Track diseases with ≥20% probability
-            if ($probability >= 0.20) {
-                $diseasesAbove20Percent[] = [
-                    'className' => $className,
-                    'probability' => $probability
-                ];
-            }
-        }
-    }
-    
-    // Rule 1: Any disease ≥ 60%
-    if ($highestDiseaseProbability >= 0.60) {
-        $sentToVet = true;
-        $detectionReason = "High confidence disease detection: {$highestDiseaseName} (" . round($highestDiseaseProbability * 100, 1) . "%)";
-    }
-    // Rule 2: Multiple diseases ≥ 20% each
-    elseif (count($diseasesAbove20Percent) >= 2) {
-        $sentToVet = true;
-        $diseaseList = array_map(function($item) {
-            return $item['className'] . " (" . round($item['probability'] * 100, 1) . "%)";
-        }, $diseasesAbove20Percent);
-        
-        $detectionReason = "Multiple potential conditions: " . implode(", ", $diseaseList);
-    }
-    
-    // If this detection should be sent to vets, create a record
-    if ($sentToVet) {
-        \App\Models\VetDisease::create([
-            'pet_id' => $pet->id,
-            'user_id' => Auth::id(),
-            'image_path' => $uploadedImage,
-            'primary_diagnosis' => $highestPrediction['className'],
-            'confidence_score' => $highestPrediction['probability'],
-            'results' => $predictions,
-            'detection_reason' => $detectionReason
-        ]);
-    }
-    
     return view('pets.disease-results', compact(
-        'pet',
+        'pet', 
         'uploadedImage', 
-        'uploadedDate',
+        'uploadedDate', 
         'predictions', 
-        'highestPrediction',
         'recommendationHtml',
-        'diseaseDetection',
-        'sentToVet',
-        'detectionReason'
+        'diseaseDetection'
     ));
 }
 /**
@@ -375,4 +329,53 @@ public function getDetectionDetails(string $petId, string $detectionId)
         'recommendation_html' => $recommendationHtml
     ]);
 }
+/**
+ * Get vet disease details as JSON for the modal
+ */
+public function getVetDiseaseDetails(string $petId, string $diseaseId)
+{
+    $pet = Pet::where('user_id', Auth::id())->findOrFail($petId);
+    $disease = \App\Models\VetDisease::where('pet_id', $pet->id)
+        ->findOrFail($diseaseId);
+    
+    // Get reviewer name if available
+    $reviewerName = null;
+    if ($disease->reviewed_by) {
+        $reviewer = \App\Models\User::find($disease->reviewed_by);
+        $reviewerName = $reviewer ? $reviewer->name : null;
+    }
+    
+    // Return disease data as JSON
+    return response()->json([
+        'id' => $disease->id,
+        'pet_id' => $disease->pet_id,
+        'primary_diagnosis' => $disease->primary_diagnosis,
+        'vet_diagnosis' => $disease->vet_diagnosis,
+        'vet_treatment' => $disease->vet_treatment,
+        'vet_notes' => $disease->vet_notes,
+        'confidence_score' => $disease->confidence_score,
+        'results' => $disease->results,
+        'image_url' => asset('storage/' . $disease->image_path),
+        'created_at' => $disease->created_at,
+        'reviewed_at' => $disease->reviewed_at,
+        'is_reviewed' => $disease->is_reviewed,
+        'is_critical' => $disease->is_critical,
+        'reviewed_by' => $disease->reviewed_by,
+        'reviewer_name' => $reviewerName
+    ]);
+}
+
+/**
+ * Print vet disease details
+ */
+public function printVetDisease(string $petId, string $diseaseId)
+{
+    $pet = Pet::where('user_id', Auth::id())->findOrFail($petId);
+    $disease = \App\Models\VetDisease::where('pet_id', $pet->id)
+        ->with('reviewer')
+        ->findOrFail($diseaseId);
+    
+    return view('pets.print-vet-disease', compact('pet', 'disease'));
+}
+
 }

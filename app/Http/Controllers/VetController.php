@@ -559,4 +559,102 @@ public function markDiseaseReviewed(string $id): RedirectResponse
             ->withInput($request->except('password', 'password_confirmation'));
     }
 }
+
+/**
+ * Display detailed disease view page with review form
+ */
+public function viewDisease(string $id): View
+{
+    // Get the disease with related data
+    $disease = \App\Models\VetDisease::with(['pet', 'user'])->findOrFail($id);
+    
+    // Get pet details if available
+    $pet = $disease->pet;
+    
+    // Get recommendations database - same as in other methods
+    $recommendations = [
+        "Hypersensivity Allergic dermatosis" => '
+            <div class="text-red-800 font-medium mb-2">Hypersensitivity/Allergic Dermatosis Detected</div>
+            <p class="mb-2">Your pet appears to have signs of allergic dermatosis. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Schedule a veterinary visit as soon as possible to confirm diagnosis</li>
+                <li>Try to identify and remove potential allergens from your pet\'s environment</li>
+                <li>Consider hypoallergenic pet food recommended by your veterinarian</li>
+                <li>Avoid using harsh chemical cleaners around your home</li>
+                <li>Regular bathing with vet-recommended medicated shampoo may help</li>
+                <li>Do not use human medications without veterinary guidance</li>
+            </ul>
+        ',
+        "Fungal Infections" => '
+            <div class="text-red-800 font-medium mb-2">Fungal Infection Detected</div>
+            <p class="mb-2">Your pet appears to have signs of a fungal infection. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Visit your veterinarian for proper diagnosis and treatment</li>
+                <li>Keep the affected areas clean and dry</li>
+                <li>Your vet may prescribe antifungal medications, shampoos or creams</li>
+                <li>Follow the complete treatment course, even if symptoms improve</li>
+                <li>Disinfect bedding, brushes and other items your pet frequently uses</li>
+                <li>Some fungal infections can spread to humans, so practice good hygiene</li>
+                <li>Consider isolating your pet from other animals until the infection clears</li>
+            </ul>
+        ',
+        "Bacterial dermatosis" => '
+            <div class="text-red-800 font-medium mb-2">Bacterial Dermatosis Detected</div>
+            <p class="mb-2">Your pet appears to have signs of bacterial skin infection. Here are some recommendations:</p>
+            <ul class="list-disc pl-5 space-y-1">
+                <li>Consult with your veterinarian for proper diagnosis and treatment</li>
+                <li>Antibiotics are typically needed and must be prescribed by a professional</li>
+                <li>Keep the affected area clean using a gentle antiseptic solution recommended by your vet</li>
+                <li>Prevent your pet from scratching, licking, or biting the affected areas</li>
+                <li>Complete the full course of antibiotics even if symptoms improve</li>
+                <li>Check for underlying causes like allergies or parasites</li>
+                <li>Regular bathing with medicated shampoos may be recommended</li>
+            </ul>
+        ',
+    ];
+    
+    $recommendationHtml = null;
+    if (isset($recommendations[$disease->primary_diagnosis])) {
+        $recommendationHtml = $recommendations[$disease->primary_diagnosis];
+    }
+    
+    return view('vet.disease-view', compact('disease', 'pet', 'recommendationHtml'));
+}
+
+
+/**
+ * Submit a veterinary review for a disease case
+ */
+public function submitReview(Request $request, string $id): RedirectResponse
+{
+    // Find the disease
+    $disease = \App\Models\VetDisease::findOrFail($id);
+    
+    // Validate the request
+    $validated = $request->validate([
+        'diagnosis' => 'required|string|max:255',
+        'treatment' => 'required|string',
+        'notes' => 'nullable|string',
+    ]);
+    
+    // Explicitly handle is_critical as a boolean
+    $is_critical = $request->has('is_critical');
+    
+    // Update the disease with the vet's review
+    $disease->update([
+        'vet_diagnosis' => $validated['diagnosis'],
+        'vet_treatment' => $validated['treatment'],
+        'vet_notes' => $validated['notes'],
+        'is_critical' => $is_critical,
+        'is_reviewed' => true,
+        'reviewed_at' => now(),
+        'reviewed_by' => Auth::id()
+    ]);
+    
+    // You might want to notify the pet owner here
+    // Notification::send($disease->user, new DiseaseReviewed($disease));
+    
+    return redirect()->route('vet.dashboard')
+        ->with('success', 'Your review has been submitted successfully.');
+}
 }

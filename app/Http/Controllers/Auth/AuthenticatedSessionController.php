@@ -29,14 +29,16 @@ class AuthenticatedSessionController extends Controller
     $request->session()->regenerate();
 
     // Check user role and redirect accordingly
-    if (Auth::user()->isVet()) {
-        return redirect()->intended(route('vet.dashboard'));
-    } elseif (Auth::user()->isAdmin()) {
+        if (Auth::user()->isVet()) {
+            return redirect()->intended(route('vet.dashboard'));
+        } elseif (Auth::user()->isAdmin()) {
+            return redirect()->intended(route('dashboard'));
+        } elseif (Auth::user()->role === 'pet_owner') {
+            return redirect()->intended(route('pet.profile'));
+        }
+
         return redirect()->intended(route('dashboard'));
     }
-
-    return redirect()->intended(route('dashboard'));
-}
 
     /**
      * Destroy an authenticated session.

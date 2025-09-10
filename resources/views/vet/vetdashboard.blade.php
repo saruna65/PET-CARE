@@ -136,6 +136,23 @@
                                                         @endif
                                                     </div>
                                                 </td>
+<!-- In the Actions column of the disease table -->
+<td class="py-3 px-4">
+    <div class="flex space-x-2">
+        <a href="{{ route('vet.disease.view', $disease->id) }}" 
+           class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">
+            View & Review
+        </a>
+        @if(!$disease->is_reviewed)
+            <form action="{{ route('vet.mark-reviewed', $disease->id) }}" method="POST" class="inline-block">
+                @csrf
+                <button type="submit" class="text-green-600 hover:text-green-900 text-sm font-medium">
+                    Mark Reviewed
+                </button>
+            </form>
+        @endif
+    </div>
+</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
