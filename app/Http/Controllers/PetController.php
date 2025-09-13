@@ -146,9 +146,10 @@ public function show(string $id): View
 
 public function analyzeDisease(Request $request, string $id): View
 {
-    // Validate the uploaded image
+    // Validate the uploaded image and predictions
     $request->validate([
         'disease_image' => 'required|image|mimes:jpeg,png,jpg,gif|max:5120',
+        'predictions_json' => 'required|json',
     ]);
 
     // Find the pet
@@ -158,14 +159,8 @@ public function analyzeDisease(Request $request, string $id): View
     $uploadedImage = $request->file('disease_image')->store('disease-images', 'public');
     $uploadedDate = now()->format('F j, Y \a\t g:i A');
     
-    // Here we would normally call the TensorFlow model API
-    // For this example, let's simulate some predictions
-    $predictions = [
-        ['className' => 'Bacterial dermatosis', 'probability' => 0.75],
-        ['className' => 'Fungal Infections', 'probability' => 0.15],
-        ['className' => 'Hypersensivity Allergic dermatosis', 'probability' => 0.08],
-        ['className' => 'Healthy', 'probability' => 0.02],
-    ];
+    // Get predictions from the request
+    $predictions = json_decode($request->input('predictions_json'), true);
     
     // Get the highest probability prediction for recommendation
     $highestPrediction = collect($predictions)->sortByDesc('probability')->first();
