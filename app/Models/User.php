@@ -68,8 +68,8 @@ class User extends Authenticatable
      */
     public function isVet(): bool
     {
-        return $this->role === 'vet' || 
-               ($this->is_admin && $this->vetProfile); // Admin can also be a vet
+        return $this->role === 'vet';
+               
     }
 
     /**
