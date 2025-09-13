@@ -119,10 +119,11 @@ class PetController extends Controller
             ->with('success', 'Pet profile deleted successfully.');
     }
    
-    /**
-     * Display the specified pet.
-     */
-    public function show(string $id): View
+    
+/**
+ * Display the specified pet.
+ */
+public function show(string $id): View
 {
     $pet = Pet::where('user_id', Auth::id())->findOrFail($id);
     
@@ -131,16 +132,18 @@ class PetController extends Controller
         ->orderBy('created_at', 'desc')
         ->paginate(3);
     
-    return view('pets.show', compact('pet', 'diseaseDetections'));
+    // Get vet disease detections for this pet (limited to 3)
+    $vetDiseases = \App\Models\VetDisease::where('pet_id', $pet->id)
+        ->orderBy('created_at', 'desc')
+        ->paginate(3);
+    
+    return view('pets.show', compact('pet', 'diseaseDetections', 'vetDiseases'));
 }
 
 /**
  * Analyze disease from uploaded image and show results.
  */
 
-/**
- * Analyze disease from uploaded image and show results.
- */
 public function analyzeDisease(Request $request, string $id): View
 {
     // Validate the uploaded image
@@ -326,4 +329,53 @@ public function getDetectionDetails(string $petId, string $detectionId)
         'recommendation_html' => $recommendationHtml
     ]);
 }
+/**
+ * Get vet disease details as JSON for the modal
+ */
+public function getVetDiseaseDetails(string $petId, string $diseaseId)
+{
+    $pet = Pet::where('user_id', Auth::id())->findOrFail($petId);
+    $disease = \App\Models\VetDisease::where('pet_id', $pet->id)
+        ->findOrFail($diseaseId);
+    
+    // Get reviewer name if available
+    $reviewerName = null;
+    if ($disease->reviewed_by) {
+        $reviewer = \App\Models\User::find($disease->reviewed_by);
+        $reviewerName = $reviewer ? $reviewer->name : null;
+    }
+    
+    // Return disease data as JSON
+    return response()->json([
+        'id' => $disease->id,
+        'pet_id' => $disease->pet_id,
+        'primary_diagnosis' => $disease->primary_diagnosis,
+        'vet_diagnosis' => $disease->vet_diagnosis,
+        'vet_treatment' => $disease->vet_treatment,
+        'vet_notes' => $disease->vet_notes,
+        'confidence_score' => $disease->confidence_score,
+        'results' => $disease->results,
+        'image_url' => asset('storage/' . $disease->image_path),
+        'created_at' => $disease->created_at,
+        'reviewed_at' => $disease->reviewed_at,
+        'is_reviewed' => $disease->is_reviewed,
+        'is_critical' => $disease->is_critical,
+        'reviewed_by' => $disease->reviewed_by,
+        'reviewer_name' => $reviewerName
+    ]);
+}
+
+/**
+ * Print vet disease details
+ */
+public function printVetDisease(string $petId, string $diseaseId)
+{
+    $pet = Pet::where('user_id', Auth::id())->findOrFail($petId);
+    $disease = \App\Models\VetDisease::where('pet_id', $pet->id)
+        ->with('reviewer')
+        ->findOrFail($diseaseId);
+    
+    return view('pets.print-vet-disease', compact('pet', 'disease'));
+}
+
 }
