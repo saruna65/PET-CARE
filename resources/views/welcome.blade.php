@@ -351,8 +351,7 @@
         // https://github.com/googlecreativelab/teachablemachine-community/tree/master/libraries/image
 
         // the link to your model provided by Teachable Machine export panel
-        const URL = "{{ asset('models/my_model/') }}/";
-    
+        const URL = "https://teachablemachine.withgoogle.com/models/9nk8R6Zfk/";
 
         let model, labelContainer, maxPredictions;
         let isModelLoaded = false;
@@ -363,10 +362,12 @@
             if (file) {
                 const reader = new FileReader();
                 
-                reader.onload = function(e) {
+                reader.onload = function(event) {
                     const img = document.getElementById('selected-image');
-                    img.src = e.target.result;
+                    img.src = event.target.result;
                     img.classList.remove('hidden');
+                    // Clear previous results when a new image is selected
+                    document.getElementById('label-container').innerHTML = '';
                 };
                 
                 reader.readAsDataURL(file);
@@ -375,35 +376,29 @@
 
         // Load the image model
         async function loadModel() {
-            if (!isModelLoaded) {
-                const modelURL = URL + "model.json";
-                const metadataURL = URL + "metadata.json";
-
-                // Show loading indicator
-                const labelContainer = document.getElementById("label-container");
-                labelContainer.innerHTML = '<div class="flex items-center justify-center py-4"><svg class="animate-spin h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2 text-indigo-600 dark:text-indigo-400">Loading model...</span></div>';
-
-                try {
-                    // Load the model
-                    model = await tmImage.load(modelURL, metadataURL);
-                    maxPredictions = model.getTotalClasses();
-                    isModelLoaded = true;
-
-                    // Initialize label container
-                    labelContainer = document.getElementById("label-container");
-                    labelContainer.innerHTML = '';
-                    for (let i = 0; i < maxPredictions; i++) {
-                        labelContainer.appendChild(document.createElement("div"));
-                    }
-
-                    return true;
-                } catch (error) {
-                    labelContainer.innerHTML = `<div class="text-red-500 text-center py-2">Error loading model: ${error.message}</div>`;
-                    console.error('Error loading model:', error);
-                    return false;
-                }
+            if (isModelLoaded) {
+                return true;
             }
-            return true;
+
+            const modelURL = URL + "model.json";
+            const metadataURL = URL + "metadata.json";
+
+            // Show loading indicator
+            labelContainer = document.getElementById("label-container");
+            labelContainer.innerHTML = '<div class="flex items-center justify-center py-4"><svg class="animate-spin h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2 text-indigo-600 dark:text-indigo-400">Loading model...</span></div>';
+
+            try {
+                // Load the model
+                model = await tmImage.load(modelURL, metadataURL);
+                maxPredictions = model.getTotalClasses();
+                isModelLoaded = true;
+                labelContainer.innerHTML = ''; // Clear loading indicator
+                return true;
+            } catch (error) {
+                labelContainer.innerHTML = `<div class="text-red-500 text-center py-2">Error loading model: ${error.message}</div>`;
+                console.error('Error loading model:', error);
+                return false;
+            }
         }
 
         // Analyze the uploaded image
@@ -412,7 +407,7 @@
             const selectedImage = document.getElementById('selected-image');
             
             if (imageUpload.files.length === 0) {
-                alert('Please select an image first');
+                alert('Please select an image first.');
                 return;
             }
 
@@ -420,33 +415,39 @@
             const modelLoaded = await loadModel();
             if (!modelLoaded) return;
 
-            // Show loading state
-            const labelContainer = document.getElementById("label-container");
+            // Show analyzing state
+            labelContainer = document.getElementById("label-container");
             labelContainer.innerHTML = '<div class="flex items-center justify-center py-4"><svg class="animate-spin h-6 w-6 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span class="ml-2 text-indigo-600 dark:text-indigo-400">Analyzing...</span></div>';
 
             try {
-                // Reset label container
-                labelContainer.innerHTML = '';
-                for (let i = 0; i < maxPredictions; i++) {
-                    labelContainer.appendChild(document.createElement("div"));
-                }
-
                 // Make prediction
                 const prediction = await model.predict(selectedImage);
                 
-                // Display results
+                // Clear analyzing indicator and prepare for results
+                labelContainer.innerHTML = '';
+
+                // Sort predictions by probability in descending order
+                prediction.sort((a, b) => b.probability - a.probability);
+                
+                // Display sorted results
                 for (let i = 0; i < maxPredictions; i++) {
-                    const classPrediction = 
-                        prediction[i].className + ": " + prediction[i].probability.toFixed(2);
-                    labelContainer.childNodes[i].innerHTML = classPrediction;
+                    const pred = prediction[i];
+                    const probability = (pred.probability * 100).toFixed(2);
+                    const isHighConfidence = pred.probability > 0.7;
+
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = `flex justify-between items-center py-2 px-4 bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 rounded-md font-medium my-1 ${isHighConfidence ? 'border-2 border-indigo-500' : ''}`;
                     
-                    // Add styling to the prediction labels
-                    labelContainer.childNodes[i].className = "py-2 px-4 bg-indigo-50 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-200 rounded-md font-medium";
+                    const classNameSpan = document.createElement('span');
+                    classNameSpan.textContent = pred.className;
                     
-                    // Highlight high probability predictions
-                    if (prediction[i].probability > 0.7) {
-                        labelContainer.childNodes[i].className += " border-2 border-indigo-500";
-                    }
+                    const probabilitySpan = document.createElement('span');
+                    probabilitySpan.className = 'font-bold';
+                    probabilitySpan.textContent = `${probability}%`;
+
+                    resultDiv.appendChild(classNameSpan);
+                    resultDiv.appendChild(probabilitySpan);
+                    labelContainer.appendChild(resultDiv);
                 }
             } catch (error) {
                 labelContainer.innerHTML = `<div class="text-red-500 text-center py-2">Error analyzing image: ${error.message}</div>`;
