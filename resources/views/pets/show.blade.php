@@ -235,7 +235,7 @@
                             </button>
                         </div>
 
-                        
+
                     </div>
                 </div>
             </div>
@@ -366,16 +366,23 @@
                                 <div
                                     class="group relative flex flex-col rounded-xl border border-gray-200 bg-gradient-to-br from-gray-50 to-white shadow-sm hover:shadow-md hover:border-blue-200 transition overflow-hidden">
                                     <div class="relative h-36 bg-gray-100 overflow-hidden">
-                                        <img src="{{ asset('storage/' . $vd->image_path) }}"
-                                            alt="Vet diagnosis image"
-                                            class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                                        @if ($vd->is_critical)
-                                            <span
-                                                class="absolute top-2 left-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-600 text-white shadow">
-                                                Critical
-                                            </span>
-                                        @endif
-                                    </div>
+    <img src="{{ asset('storage/' . $vd->image_path) }}"
+        alt="Vet diagnosis image"
+        class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+    <div class="absolute top-2 left-2 flex flex-col space-y-1">
+        @if ($vd->is_critical)
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-600 text-white shadow">
+                Critical
+            </span>
+        @endif
+        
+        @if ($vd->has_zoonotic_risk)
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-600 text-white shadow">
+                Zoonotic Risk
+            </span>
+        @endif
+    </div>
+</div>
                                     <div class="p-4 flex flex-col flex-1">
                                         <h3 class="font-semibold text-gray-800 text-sm line-clamp-1">
                                             {{ $vd->vet_diagnosis ?? $vd->primary_diagnosis }}
@@ -470,7 +477,7 @@
                     class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium transition">
                     Close
                 </button>
-                
+
             </div>
         </div>
     </div>
@@ -478,8 +485,7 @@
     <!-- Disease Detection Modal -->
     <div id="diseaseModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center px-4 py-8">
-        <div
-            class="bg-white rounded-2xl w-full max-w-xl shadow-2xl  overflow-hidden animate-[fadeIn_.35s_ease]">
+        <div class="bg-white rounded-2xl w-full max-w-xl shadow-2xl  overflow-hidden animate-[fadeIn_.35s_ease]">
             <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 flex items-center justify-between">
                 <h3 class="text-white font-semibold text-lg flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2"
@@ -589,7 +595,7 @@
                     class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium transition">
                     Close
                 </button>
-                
+
             </div>
         </div>
     </div>
@@ -633,64 +639,64 @@
         }
 
         function openDetectionModal(id) {
-    const modal = document.getElementById('detectionModal');
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    document.body.classList.add('overflow-hidden');
+            const modal = document.getElementById('detectionModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.classList.add('overflow-hidden');
 
-    const content = document.getElementById('detectionModalContent');
-    const title = document.getElementById('detectionModalTitle');
-    
+            const content = document.getElementById('detectionModalContent');
+            const title = document.getElementById('detectionModalTitle');
 
-    title.innerHTML = 'Loading...';
-    content.innerHTML = `<div class="flex items-center justify-center py-12">
-        <svg class="w-10 h-10 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                    stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-        </svg>
-    </div>`;
 
-    fetch(`/pet/{{ $pet->id }}/disease/${id}/details`, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}'
-            }
-        })
-        .then(r => r.json())
-        .then(data => {
-            // Map short class names to full class names
-            const classNameMap = {
-                'Hypersensivi...': 'Hypersensivity Allergic dermatosis',
-                'Fungal Infec...': 'Fungal Infections',
-                'Bacterial de...': 'Bacterial dermatosis',
-                'Healthy': 'Healthy'
-            };
+            title.innerHTML = 'Loading...';
+            content.innerHTML = `<div class="flex items-center justify-center py-12">
+                                    <svg class="w-10 h-10 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                                                stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor"
+                                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                                    </svg>
+                                </div>`;
 
-            // Get full name for primary diagnosis
-            let primaryDiagnosis = data.primary_diagnosis;
-            if (classNameMap[primaryDiagnosis]) {
-                primaryDiagnosis = classNameMap[primaryDiagnosis];
-            }
+            fetch(`/pet/{{ $pet->id }}/disease/${id}/details`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    }
+                })
+                .then(r => r.json())
+                .then(data => {
+                    // Map short class names to full class names
+                    const classNameMap = {
+                        'Hypersensivi...': 'Hypersensivity Allergic dermatosis',
+                        'Fungal Infec...': 'Fungal Infections',
+                        'Bacterial de...': 'Bacterial dermatosis',
+                        'Healthy': 'Healthy'
+                    };
 
-            title.innerHTML = `Detection Results: ${primaryDiagnosis}`;
-            const confidence = (data.confidence_score * 100).toFixed(1);
-            let barColor = 'bg-green-600';
-            let headerColor = 'bg-green-100 text-green-800';
-            if (data.confidence_score > 0.7) {
-                barColor = 'bg-red-600';
-                headerColor = 'bg-red-100 text-red-800';
-            } else if (data.confidence_score > 0.3) {
-                barColor = 'bg-yellow-600';
-                headerColor = 'bg-yellow-100 text-yellow-800';
-            }
-            const created = new Date(data.created_at).toLocaleString();
+                    // Get full name for primary diagnosis
+                    let primaryDiagnosis = data.primary_diagnosis;
+                    if (classNameMap[primaryDiagnosis]) {
+                        primaryDiagnosis = classNameMap[primaryDiagnosis];
+                    }
 
-            const isSmall = window.innerWidth < 768;
-            const layout = isSmall ? 'flex  flex-col space-y-8' : 'grid md:grid-cols-5 gap-8';
+                    title.innerHTML = `Detection Results: ${primaryDiagnosis}`;
+                    const confidence = (data.confidence_score * 100).toFixed(1);
+                    let barColor = 'bg-green-600';
+                    let headerColor = 'bg-green-100 text-green-800';
+                    if (data.confidence_score > 0.7) {
+                        barColor = 'bg-red-600';
+                        headerColor = 'bg-red-100 text-red-800';
+                    } else if (data.confidence_score > 0.3) {
+                        barColor = 'bg-yellow-600';
+                        headerColor = 'bg-yellow-100 text-yellow-800';
+                    }
+                    const created = new Date(data.created_at).toLocaleString();
 
-            content.innerHTML = `
+                    const isSmall = window.innerWidth < 768;
+                    const layout = isSmall ? 'flex  flex-col space-y-8' : 'grid md:grid-cols-5 gap-8';
+
+                    content.innerHTML = `
                 <div class="${layout} ">
                     <div class="${isSmall ? '' : 'md:col-span-2'}">
                         <h4 class="text-sm font-semibold text-gray-700 mb-2">Uploaded Image</h4>
@@ -725,29 +731,37 @@
                                     className = classNameMap[className];
                                 }
                                 
-                                return `
-                                    <div class="p-3 rounded-lg ${rc} shadow">
-                                        <div class="flex items-center justify-between mb-1">
-                                            <span class="font-medium text-sm">${className}</span>
-                                            <span class="text-xs font-semibold">${pct}%</span>
-                                        </div>
-                                        <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden">
-                                            <div class="h-2 ${bc}" style="width:${pct}%"></div>
-                                        </div>
-                                    </div>
-                                `;
+                                return ` <
+                        div class = "p-3 rounded-lg ${rc} shadow" >
+                        <
+                        div class = "flex items-center justify-between mb-1" >
+                        <
+                        span class = "font-medium text-sm" > $ {
+                            className
+                        } < /span> <
+                        span class = "text-xs font-semibold" > $ {
+                            pct
+                        } % < /span> <
+                        /div> <
+                        div class = "w-full h-2 bg-white/60 rounded-full overflow-hidden" >
+                        <
+                        div class = "h-2 ${bc}"
+                    style = "width:${pct}%" > < /div> <
+                        /div> <
+                        /div>
+                    `;
                             }).join('')}
                         </div>
                         <h4 class="text-sm font-semibold text-gray-700 mb-3">Recommendations</h4>
                         <div class="rounded-xl bg-blue-50 border border-blue-200 p-4 text-sm leading-relaxed text-blue-900">
                             ${data.recommendation_html || `
-                                    <p class="mb-2">Consult your veterinarian to confirm these AI-generated findings.</p>
-                                    <ul class="list-disc pl-5 space-y-1">
-                                        <li>Monitor symptoms progression</li>
-                                        <li>Prepare medical history for vet</li>
-                                        <li>Schedule a follow-up scan if condition changes</li>
-                                    </ul>
-                                `}
+                                        <p class="mb-2">Consult your veterinarian to confirm these AI-generated findings.</p>
+                                        <ul class="list-disc pl-5 space-y-1">
+                                            <li>Monitor symptoms progression</li>
+                                            <li>Prepare medical history for vet</li>
+                                            <li>Schedule a follow-up scan if condition changes</li>
+                                        </ul>
+                                    `}
                         </div>
                         <div class="mt-6 pt-5 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
                             <span>ID: #${data.id}</span>
@@ -756,15 +770,15 @@
                     </div>
                 </div>
             `;
-            
-        })
-        .catch(() => {
-            content.innerHTML = `
+
+                })
+                .catch(() => {
+                    content.innerHTML = `
                 <div class="p-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
                     Failed to load detection details. Please try again.
                 </div>`;
-        });
-}
+                });
+        }
 
         function closeDetectionModal() {
             const modal = document.getElementById('detectionModal');
@@ -809,80 +823,129 @@
                     const layout = isSmall ? 'flex flex-col space-y-8' : 'grid md:grid-cols-5 gap-8';
 
                     content.innerHTML = `
-                        <div class="${layout}">
-                            <div class="${isSmall ? '' : 'md:col-span-2'}">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Reference Image</h4>
-                                <div class="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                                    <img src="${data.image_url}" alt="Vet disease image" class="w-full h-auto object-contain max-h-80">
-                                </div>
-                                <div class="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
-                                    <p class="text-xs uppercase font-semibold tracking-wide text-blue-600 mb-2">Assessment</p>
-                                    <p class="text-lg font-bold text-blue-800 mb-1">${data.vet_diagnosis || data.primary_diagnosis}</p>
-                                    ${data.is_critical ? `<span class="inline-block mt-2 px-2 py-1 rounded-md bg-red-100 text-red-700 text-xs font-semibold">Critical Condition</span>` : ''}
-                                    <p class="mt-3 text-xs text-gray-500">Submitted: ${created}</p>
-                                    ${reviewed ? `<p class="text-xs text-gray-500">Reviewed: ${reviewed}</p>` : ''}
-                                </div>
-                            </div>
-                            <div class="${isSmall ? '' : 'md:col-span-3'}">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Diagnosis Details</h4>
-                                <div class="rounded-xl bg-gray-50 border border-gray-200 p-5 text-sm space-y-4">
-                                    ${data.vet_diagnosis ? `
-                                            <div>
-                                                <p class="font-semibold text-gray-700 mb-1">Diagnosis</p>
-                                                <p class="text-gray-800 leading-relaxed">${data.vet_diagnosis}</p>
-                                            </div>` : `<p class="italic text-gray-500">No veterinarian diagnosis provided yet.</p>`
-                                    }
-                                    ${data.vet_treatment ? `
-                                            <div>
-                                                <p class="font-semibold text-gray-700 mb-1">Treatment Plan</p>
-                                                <p class="text-gray-800 leading-relaxed">${data.vet_treatment}</p>
-                                            </div>` : ''
-                                    }
-                                </div>
-
-                                ${data.vet_notes ? `
-                                        <h4 class="text-sm font-semibold text-gray-700 mt-6 mb-3">Veterinarian Notes</h4>
-                                        <div class="rounded-xl bg-yellow-50 border border-yellow-200 p-5 text-sm text-gray-800 leading-relaxed">
-                                            ${data.vet_notes}
-                                        </div>` : ''
-                                }
-
-                                <h4 class="text-sm font-semibold text-gray-700 mt-8 mb-3">AI Initial Assessment</h4>
-                                <div class="space-y-3">
-                                    ${(data.results && Array.isArray(data.results) && data.results.length) ? data.results.map(r => {
-                                        const pct = (r.probability * 100).toFixed(1);
-                                        let rc = 'bg-green-100 text-green-800';
-                                        let bc = 'bg-green-600';
-                                        if (r.probability > 0.7) { rc = 'bg-red-100 text-red-800'; bc = 'bg-red-600'; }
-                                        else if (r.probability > 0.3) { rc = 'bg-yellow-100 text-yellow-800'; bc = 'bg-yellow-600'; }
-                                        return `
-                                            <div class="p-3 rounded-lg ${rc} shadow">
-                                                <div class="flex items-center justify-between mb-1">
-                                                    <span class="font-medium text-sm">${r.className}</span>
-                                                    <span class="text-xs font-semibold">${pct}%</span>
-                                                </div>
-                                                <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden">
-                                                    <div class="h-2 ${bc}" style="width:${pct}%"></div>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('') : `<p class="italic text-gray-500 text-sm">No AI assessment data.</p>`}
-                                </div>
-
-                                <div class="mt-6 pt-5 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-                                    <span>Case ID: #${data.id}</span>
-                                    ${data.reviewed_by ? `<span>Reviewed by: Dr. ${data.reviewer_name || 'Unknown'}</span>` : ''}
-                                </div>
-                            </div>
+                <div class="${layout}">
+                    <div class="${isSmall ? '' : 'md:col-span-2'}">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Reference Image</h4>
+                        <div class="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
+                            <img src="${data.image_url}" alt="Vet disease image" class="w-full h-auto object-contain max-h-80">
                         </div>
-                    `;
-                    
-                })
-                .catch(() => {
-                    content.innerHTML = `
-                        <div class="p-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-                            Failed to load vet diagnosis details. Please try again.
-                        </div>`;
+                        <div class="mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
+                            <p class="text-xs uppercase font-semibold tracking-wide text-blue-600 mb-2">Assessment</p>
+                            <p class="text-lg font-bold text-blue-800 mb-1">${data.vet_diagnosis || data.primary_diagnosis}</p>
+                            
+                            <!-- Display Critical and Zoonotic Risk badges -->
+                            <div class="flex flex-wrap gap-2 mt-2">
+                                ${data.is_critical ? 
+                                    `<span class="inline-flex items-center px-2 py-1 rounded-md bg-red-100 text-red-700 text-xs font-semibold">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                        </svg>
+                                        Critical Condition
+                                    </span>` 
+                                    : ''
+                                }
+                                
+                                <!-- Add Zoonotic Risk Badge -->
+                                ${data.has_zoonotic_risk ? 
+                                    `<span class="inline-flex items-center px-2 py-1 rounded-md bg-yellow-100 text-yellow-800 text-xs font-semibold">
+                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd" />
+                                        </svg>
+                                        Zoonotic Risk
+                                    </span>`
+                                    : ''
+                                }
+                            </div>
+                            <p class="mt-3 text-xs text-gray-500">Submitted: ${created}</p>
+                            ${reviewed ? `<p class="text-xs text-gray-500">Reviewed: ${reviewed}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="${isSmall ? '' : 'md:col-span-3'}">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Diagnosis Details</h4>
+                        <div class="rounded-xl bg-gray-50 border border-gray-200 p-5 text-sm space-y-4">
+                            ${data.vet_diagnosis ? `
+                                    <div>
+                                        <p class="font-semibold text-gray-700 mb-1">Diagnosis</p>
+                                        <p class="text-gray-800 leading-relaxed">${data.vet_diagnosis}</p>
+                                    </div>` : `<p class="italic text-gray-500">No veterinarian diagnosis provided yet.</p>`
+                            }
+                            ${data.vet_treatment ? `
+                                    <div>
+                                        <p class="font-semibold text-gray-700 mb-1">Treatment Plan</p>
+                                        <p class="text-gray-800 leading-relaxed">${data.vet_treatment}</p>
+                                    </div>` : ''
+                            }
+                        </div>
+
+                        <!-- Add Zoonotic Risk Warning -->
+                        ${data.has_zoonotic_risk ? `
+                            <div class="mt-6">
+                                <div class="rounded-xl bg-yellow-50 border border-yellow-300 p-5 shadow-sm">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 mr-3">
+                                            <svg class="w-6 h-6 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <h5 class="text-yellow-800 font-semibold mb-2">⚠️ Zoonotic Risk Warning</h5>
+                                            <p class="text-yellow-700 text-sm mb-3">This condition can potentially spread from your pet to humans. Please take precautions.</p>
+                                            ${data.zoonotic_precautions ? `
+                                                <div class="bg-white/80 rounded-lg p-3 border border-yellow-200">
+                                                    <p class="text-xs font-medium text-yellow-800 mb-1">Precaution Instructions:</p>
+                                                    <p class="text-sm text-yellow-800">${data.zoonotic_precautions}</p>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+
+                        ${data.vet_notes ? `
+                                <h4 class="text-sm font-semibold text-gray-700 mt-6 mb-3">Veterinarian Notes</h4>
+                                <div class="rounded-xl bg-yellow-50 border border-yellow-200 p-5 text-sm text-gray-800 leading-relaxed">
+                                    ${data.vet_notes}
+                                </div>` : ''
+                        }
+
+                        <h4 class="text-sm font-semibold text-gray-700 mt-8 mb-3">AI Initial Assessment</h4>
+                        <div class="space-y-3">
+                            ${(data.results && Array.isArray(data.results) && data.results.length) ? data.results.map(r => {
+                                const pct = (r.probability * 100).toFixed(1);
+                                let rc = 'bg-green-100 text-green-800';
+                                let bc = 'bg-green-600';
+                                if (r.probability > 0.7) { rc = 'bg-red-100 text-red-800'; bc = 'bg-red-600'; }
+                                else if (r.probability > 0.3) { rc = 'bg-yellow-100 text-yellow-800'; bc = 'bg-yellow-600'; }
+                                return `
+                                    <div class="p-3 rounded-lg ${rc} shadow">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-sm">${r.className}</span>
+                                            <span class="text-xs font-semibold">${pct}%</span>
+                                        </div>
+                                        <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden">
+                                            <div class="h-2 ${bc}" style="width:${pct}%"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('') : `<p class="italic text-gray-500 text-sm">No AI assessment data.</p>`}
+                        </div>
+
+                        <div class="mt-6 pt-5 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
+                            <span>Case ID: #${data.id}</span>
+                            ${data.reviewed_by ? `<span>Reviewed by: Dr. ${data.reviewer_name || 'Unknown'}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+                        
+                    })
+                    .catch(() => {
+                        content.innerHTML = ` <
+                div class = "p-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm" >
+                Failed to load vet diagnosis details.Please
+                try again. <
+                    /div>`;
                 });
         }
 
@@ -957,7 +1020,7 @@
 
             const form = document.getElementById('diseaseForm');
             const button = document.getElementById('analyzeButton');
-            
+
             button.disabled = true;
             button.innerHTML = `
                 <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
@@ -970,7 +1033,7 @@
             try {
                 await loadModel();
                 const predictions = await model.predict(selectedImageElement);
-                
+
                 // Add predictions to a hidden input
                 const predictionsInput = document.getElementById('predictions_json');
                 predictionsInput.value = JSON.stringify(predictions);
