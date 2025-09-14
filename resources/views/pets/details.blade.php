@@ -1,4 +1,4 @@
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6"> <!-- login in admin -admin dashboard - view pets - view details -->
     <!-- Pet Image -->
     <div class="md:col-span-1">
         <div class="rounded-lg overflow-hidden shadow">
