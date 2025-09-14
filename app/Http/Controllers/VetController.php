@@ -630,6 +630,12 @@ public function submitReview(Request $request, string $id): RedirectResponse
     // Find the disease
     $disease = \App\Models\VetDisease::findOrFail($id);
     
+    // Check if this case has already been reviewed
+    if ($disease->is_reviewed) {
+        return redirect()->route('vet.dashboard')
+            ->with('warning', 'This case has already been reviewed.');
+    }
+    
     // Validate the request
     $validated = $request->validate([
         'diagnosis' => 'required|string|max:255',
@@ -640,7 +646,7 @@ public function submitReview(Request $request, string $id): RedirectResponse
     // Explicitly handle is_critical as a boolean
     $is_critical = $request->has('is_critical');
     
-    // Update the disease with the vet's review
+    // Update the disease with the vet's review - do not create a new record
     $disease->update([
         'vet_diagnosis' => $validated['diagnosis'],
         'vet_treatment' => $validated['treatment'],
@@ -651,9 +657,7 @@ public function submitReview(Request $request, string $id): RedirectResponse
         'reviewed_by' => Auth::id()
     ]);
     
-    // You might want to notify the pet owner here
-    // Notification::send($disease->user, new DiseaseReviewed($disease));
-    
+    // Redirect with success message
     return redirect()->route('vet.dashboard')
         ->with('success', 'Your review has been submitted successfully.');
 }

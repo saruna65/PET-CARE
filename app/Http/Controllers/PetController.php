@@ -162,6 +162,21 @@ public function analyzeDisease(Request $request, string $id): View
     // Get predictions from the request
     $predictions = json_decode($request->input('predictions_json'), true);
     
+    // Map short class names to full class names if needed
+    $classNameMap = [
+        'Hypersensivi...' => 'Hypersensivity Allergic dermatosis',
+        'Fungal Infec...' => 'Fungal Infections',
+        'Bacterial de...' => 'Bacterial dermatosis',
+        'Healthy' => 'Healthy'
+    ];
+    
+    // Convert any shortened class names to full names
+    foreach ($predictions as $key => $prediction) {
+        if (isset($classNameMap[$prediction['className']])) {
+            $predictions[$key]['className'] = $classNameMap[$prediction['className']];
+        }
+    }
+    
     // Get the highest probability prediction for recommendation
     $highestPrediction = collect($predictions)->sortByDesc('probability')->first();
     $recommendationHtml = null;
@@ -169,7 +184,7 @@ public function analyzeDisease(Request $request, string $id): View
     // Recommendations database - same as dashboard
     $recommendations = [
         "Hypersensivity Allergic dermatosis" => '
-            <div class="text-red-800 font-medium mb-2">Hypersensitivity/Allergic Dermatosis Detected</div>
+            <div class="text-red-800 font-medium mb-2">Hypersensitivity Allergic Dermatosis Detected</div>
             <p class="mb-2">Your pet appears to have signs of allergic dermatosis. Here are some recommendations:</p>
             <ul class="list-disc pl-5 space-y-1">
                 <li>Schedule a veterinary visit as soon as possible to confirm diagnosis</li>
@@ -224,7 +239,7 @@ public function analyzeDisease(Request $request, string $id): View
         $recommendationHtml = $recommendations[$highestPrediction['className']];
     }
     
-    // Save the results to the database
+    // Save the results to the disease_detections table
     $diseaseDetection = new \App\Models\DiseaseDetection([
         'pet_id' => $pet->id,
         'user_id' => Auth::id(),
@@ -235,15 +250,44 @@ public function analyzeDisease(Request $request, string $id): View
     ]);
     $diseaseDetection->save();
     
+    // Determine if this case should be sent for veterinarian review
+    $sendToVet = false;
+    $detectionReason = null;
+    
+    // Cases where confidence is high for a condition (>70%)
+    if ($highestPrediction['probability'] > 0.7 && $highestPrediction['className'] !== 'Healthy') {
+        $sendToVet = true;
+        $detectionReason = "High confidence disease detection (" . number_format($highestPrediction['probability'] * 100, 1) . "%)";
+    }
+    
+    // If we need to send to vet, create a record in vet_diseases table
+    if ($sendToVet) {
+        // Create a VetDisease record
+        $vetDisease = new \App\Models\VetDisease([
+            'pet_id' => $pet->id,
+            'user_id' => Auth::id(),
+            'image_path' => $uploadedImage,
+            'results' => $predictions,
+            'primary_diagnosis' => $highestPrediction['className'],
+            'confidence_score' => $highestPrediction['probability'],
+            'is_reviewed' => false,
+            'detection_reason' => $detectionReason
+        ]);
+        $vetDisease->save();
+    }
+    
     return view('pets.disease-results', compact(
         'pet', 
         'uploadedImage', 
         'uploadedDate', 
         'predictions', 
         'recommendationHtml',
-        'diseaseDetection'
+        'diseaseDetection',
+        'sendToVet',
+        'detectionReason'
     ));
 }
+
 /**
  * Get detection details as JSON for the modal
  */
@@ -252,6 +296,30 @@ public function getDetectionDetails(string $petId, string $detectionId)
     $pet = Pet::where('user_id', Auth::id())->findOrFail($petId);
     $detection = \App\Models\DiseaseDetection::where('pet_id', $pet->id)
         ->findOrFail($detectionId);
+    
+    // Mapping for consistent class names
+    $classNameMap = [
+        'Hypersensivi...' => 'Hypersensivity Allergic dermatosis',
+        'Fungal Infec...' => 'Fungal Infections',
+        'Bacterial de...' => 'Bacterial dermatosis',
+        'Healthy' => 'Healthy'
+    ];
+    
+    // Convert primary diagnosis if needed
+    $primaryDiagnosis = $detection->primary_diagnosis;
+    if (isset($classNameMap[$primaryDiagnosis])) {
+        $primaryDiagnosis = $classNameMap[$primaryDiagnosis];
+    }
+    
+    // Convert result class names
+    $results = $detection->results;
+    if (is_array($results)) {
+        foreach ($results as $key => $result) {
+            if (isset($result['className']) && isset($classNameMap[$result['className']])) {
+                $results[$key]['className'] = $classNameMap[$result['className']];
+            }
+        }
+    }
     
     // Recommendations database - same as analyzeDisease
     $recommendations = [
@@ -308,22 +376,23 @@ public function getDetectionDetails(string $petId, string $detectionId)
     ];
     
     $recommendationHtml = null;
-    if (isset($recommendations[$detection->primary_diagnosis])) {
-        $recommendationHtml = $recommendations[$detection->primary_diagnosis];
+    if (isset($recommendations[$primaryDiagnosis])) {
+        $recommendationHtml = $recommendations[$primaryDiagnosis];
     }
     
     // Return detection data as JSON
     return response()->json([
         'id' => $detection->id,
         'pet_id' => $detection->pet_id,
-        'primary_diagnosis' => $detection->primary_diagnosis,
+        'primary_diagnosis' => $primaryDiagnosis,
         'confidence_score' => $detection->confidence_score,
-        'results' => $detection->results,
+        'results' => $results,
         'image_url' => asset('storage/' . $detection->image_path),
         'created_at' => $detection->created_at,
         'recommendation_html' => $recommendationHtml
     ]);
 }
+
 /**
  * Get vet disease details as JSON for the modal
  */
@@ -332,6 +401,30 @@ public function getVetDiseaseDetails(string $petId, string $diseaseId)
     $pet = Pet::where('user_id', Auth::id())->findOrFail($petId);
     $disease = \App\Models\VetDisease::where('pet_id', $pet->id)
         ->findOrFail($diseaseId);
+    
+    // Mapping for consistent class names
+    $classNameMap = [
+        'Hypersensivi...' => 'Hypersensivity Allergic dermatosis',
+        'Fungal Infec...' => 'Fungal Infections',
+        'Bacterial de...' => 'Bacterial dermatosis',
+        'Healthy' => 'Healthy'
+    ];
+    
+    // Convert primary diagnosis if needed
+    $primaryDiagnosis = $disease->primary_diagnosis;
+    if (isset($classNameMap[$primaryDiagnosis])) {
+        $primaryDiagnosis = $classNameMap[$primaryDiagnosis];
+    }
+    
+    // Convert result class names
+    $results = $disease->results;
+    if (is_array($results)) {
+        foreach ($results as $key => $result) {
+            if (isset($result['className']) && isset($classNameMap[$result['className']])) {
+                $results[$key]['className'] = $classNameMap[$result['className']];
+            }
+        }
+    }
     
     // Get reviewer name if available
     $reviewerName = null;
@@ -344,12 +437,12 @@ public function getVetDiseaseDetails(string $petId, string $diseaseId)
     return response()->json([
         'id' => $disease->id,
         'pet_id' => $disease->pet_id,
-        'primary_diagnosis' => $disease->primary_diagnosis,
+        'primary_diagnosis' => $primaryDiagnosis,
         'vet_diagnosis' => $disease->vet_diagnosis,
         'vet_treatment' => $disease->vet_treatment,
         'vet_notes' => $disease->vet_notes,
         'confidence_score' => $disease->confidence_score,
-        'results' => $disease->results,
+        'results' => $results,
         'image_url' => asset('storage/' . $disease->image_path),
         'created_at' => $disease->created_at,
         'reviewed_at' => $disease->reviewed_at,
