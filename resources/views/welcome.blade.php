@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Advanced pet infection detection and veterinary care services">
 
-    <title>{{ config('app.name', 'Pet Care - Infection Detection') }}</title>
+    <title>Pet Care - Infection Detection</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
