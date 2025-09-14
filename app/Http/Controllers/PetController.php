@@ -449,6 +449,8 @@ public function getVetDiseaseDetails(string $petId, string $diseaseId)
         'is_reviewed' => $disease->is_reviewed,
         'is_critical' => $disease->is_critical,
         'reviewed_by' => $disease->reviewed_by,
+        'has_zoonotic_risk' => (bool)$disease->has_zoonotic_risk, // Cast to boolean
+        'zoonotic_precautions' => $disease->zoonotic_precautions,
         'reviewer_name' => $reviewerName
     ]);
 }

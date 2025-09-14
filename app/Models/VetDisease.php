@@ -24,7 +24,9 @@ class VetDisease extends Model
         'vet_notes',
         'is_critical',
         'reviewed_at',
-        'reviewed_by'
+        'reviewed_by',
+        'has_zoonotic_risk', // Add this new field
+        'zoonotic_precautions' // Add this new field for precaution instructions
     ];
 
     /**
@@ -37,6 +39,7 @@ class VetDisease extends Model
         'confidence_score' => 'float',
         'is_reviewed' => 'boolean',
         'is_critical' => 'boolean',
+         'has_zoonotic_risk' => 'boolean', // Add this cast
         'reviewed_at' => 'datetime',
     ];
 
