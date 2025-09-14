@@ -87,64 +87,78 @@
 </header>
 
         <!-- Hero Section -->
-        <section class="relative bg-indigo-700 overflow-hidden">
-
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
-        <div class="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-                <h2 class="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl">
-                    Advanced Pet Infection Detection
-                </h2>
-                <p class="mt-6 max-w-md text-xl text-indigo-100">
-                    Early detection saves lives. Our cutting-edge technology helps identify pet infections before
-                    they become serious.
-                </p>
-                <div class="mt-10 flex space-x-4">
-                    @auth
-                        @if (auth()->user()->isAdmin())
-                            <a href="{{ route('dashboard') }}"
-                                class="inline-block bg-white py-3 px-6 border border-transparent rounded-md text-base font-medium text-indigo-700 hover:bg-indigo-50">
-                                Admin Dashboard
-                            </a>
-                        @elseif (auth()->user()->isVet())
-                            <a href="{{ route('vet.dashboard') }}"
-                                class="inline-block bg-white py-3 px-6 border border-transparent rounded-md text-base font-medium text-indigo-700 hover:bg-indigo-50">
-                                Vet Dashboard
-                            </a>
-                        @else
-                            <a href="{{ route('pet.profile') }}"
-                                class="inline-block bg-white py-3 px-6 border border-transparent rounded-md text-base font-medium text-indigo-700 hover:bg-indigo-50">
-                                My Pets
-                            </a>
-                        @endif
-                    @else
-                        <a href="{{ route('register') }}"
-                            class="inline-block bg-white py-3 px-6 border border-transparent rounded-md text-base font-medium text-indigo-700 hover:bg-indigo-50">
-                            Register Now
-                        </a>
-                        <a href="{{ route('login') }}"
-                            class="inline-block bg-indigo-600 py-3 px-6 border border-transparent rounded-md text-base font-medium text-white hover:bg-indigo-500">
-                            Sign In
-                        </a>
-                    @endauth
+ <section class="relative bg-cover bg-center bg-no-repeat h-[90vh]" style="background-image: url('https://images.pexels.com/photos/7516509/pexels-photo-7516509.jpeg?auto=compress&cs=tinysrgb&w=1400');">
+    <div class="absolute inset-0 bg-black/60"></div>
+    <div class="relative max-w-screen-xl mx-auto px-4 py-32 sm:px-6 lg:px-8 h-full flex items-center">
+        <div class="max-w-xl text-white">
+            <div class="mb-4">
+                <div class="inline-block py-1 px-3 rounded-full bg-blue-600 text-sm font-medium text-white">
+                    Pet Care Technology
                 </div>
             </div>
-            <!-- Hero image remains the same -->
-            <div class="hidden md:block relative">
-                <img src="https://images.pexels.com/photos/7210754/pexels-photo-7210754.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-                    alt="Healthy pet with owner" 
-                    class="rounded-lg shadow-2xl w-full object-cover h-80 lg:h-96">
-                <div class="absolute -bottom-6 -left-6 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg">
-                    <div class="flex items-center space-x-2 text-sm text-indigo-600 dark:text-indigo-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            <h1 class="text-4xl font-extrabold sm:text-5xl lg:text-6xl mb-6 leading-tight">
+                Advanced Pet <span class="text-blue-400">Infection Detection</span>
+            </h1>
+            <p class="text-lg md:text-xl text-gray-300 mb-10">
+                Early detection saves lives. Our cutting-edge technology helps identify pet infections before they become serious health issues.
+            </p>
+            <div class="flex flex-wrap gap-4">
+                @auth
+                    @if (auth()->user()->isAdmin())
+                        <a href="{{ route('dashboard') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-base font-medium shadow-lg transition-all">
+                            Admin Dashboard
+                            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    @elseif (auth()->user()->isVet())
+                        <a href="{{ route('vet.dashboard') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-base font-medium shadow-lg transition-all">
+                            Vet Dashboard
+                            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    @else
+                        <a href="{{ route('pet.profile') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-base font-medium shadow-lg transition-all">
+                            My Pets
+                            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                            </svg>
+                        </a>
+                    @endif
+                @else
+                    <a href="{{ route('register') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-base font-medium shadow-lg transition-all">
+                        Register Now
+                        <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                         </svg>
-                        <span class="font-medium">Early detection is key to pet health</span>
-                    </div>
+                    </a>
+                    <a href="{{ route('login') }}" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-white text-blue-700 hover:bg-gray-100 text-base font-medium shadow-lg transition-all">
+                        Sign In
+                    </a>
+                @endauth
+                <a href="#demo" class="inline-flex items-center justify-center px-6 py-3 rounded-md bg-transparent border border-white hover:bg-white/10 text-white text-base font-medium transition-all">
+                    Try Demo
+                </a>
+            </div>
+            
+            <div class="mt-8 flex items-center">
+                <div class="flex -space-x-2">
+                    <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=60" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                    <img src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=60" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
+                    <img src="https://images.pexels.com/photos/697509/pexels-photo-697509.jpeg?auto=compress&cs=tinysrgb&w=60" class="w-10 h-10 rounded-full border-2 border-white" alt="User">
                 </div>
+                <span class="text-sm text-gray-300 ml-2">Joined by 1,000+ pet owners</span>
             </div>
         </div>
+    </div>
+    
+    <div class="absolute bottom-5 left-0 right-0 flex justify-center">
+        <a href="#features" class="text-white animate-bounce">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </a>
     </div>
 </section>
         <!-- AI Detection Demo Section -->
