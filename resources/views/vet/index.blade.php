@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout><!-- admin manage vets -->
     <div class="py-12 bg-gradient-to-b from-blue-50 to-white">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-8">

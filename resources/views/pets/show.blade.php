@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout><!-- view profile -->
     <div class="py-10 sm:py-14 bg-gradient-to-b from-indigo-50 via-white to-white">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
 
