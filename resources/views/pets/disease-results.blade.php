@@ -1,3 +1,4 @@
+
 <x-app-layout><!-- pet -image upload - review results -->
     <div class="py-12 bg-gradient-to-b from-blue-50 to-white">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
@@ -77,12 +78,25 @@
                                             $colorClass = 'bg-green-100 text-green-800';
                                             $barColor = 'bg-green-600';
                                         }
+                                        
+                                        // Map short class names to full class names
+                                        $fullClassName = $prediction['className'];
+                                        $classNameMap = [
+                                            'Hypersensivi...' => 'Hypersensivity Allergic dermatosis',
+                                            'Fungal Infec...' => 'Fungal Infections',
+                                            'Bacterial de...' => 'Bacterial dermatosis',
+                                            'Healthy' => 'Healthy'
+                                        ];
+                                        
+                                        if (array_key_exists($prediction['className'], $classNameMap)) {
+                                            $fullClassName = $classNameMap[$prediction['className']];
+                                        }
                                     @endphp
                                     
                                     <div class="p-4 rounded-lg {{ $colorClass }}">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <span class="font-medium">{{ $prediction['className'] }}</span>
-                                            <span class="text-sm font-bold">{{ number_format($probability, 1) }}%</span>
+                                        <div class="flex justify-between items-start mb-1">
+                                            <span class="font-medium">{{ $fullClassName }}</span>
+                                            <span class="text-sm font-bold ml-2 flex-shrink-0">{{ number_format($probability, 1) }}%</span>
                                         </div>
                                         <div class="w-full bg-white/60 rounded-full h-3">
                                             <div class="h-3 rounded-full {{ $barColor }}" style="width: {{ $probability }}%"></div>

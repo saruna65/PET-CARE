@@ -235,14 +235,7 @@
                             </button>
                         </div>
 
-                        <a href="{{ route('pet.edit', $pet->id) }}"
-                            class="inline-flex items-center px-5 py-2 rounded-lg bg-gradient-to-r from-indigo-500 to-violet-600 hover:from-indigo-600 hover:to-violet-700 text-white font-medium text-sm shadow-lg shadow-indigo-500/30 transition">
-                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379
-                                5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                            Edit Profile
-                        </a>
+                        
                     </div>
                 </div>
             </div>
@@ -444,7 +437,7 @@
     <div id="vetDiseaseModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center px-4 py-8 overflow-y-auto">
         <div
-            class="bg-white rounded-2xl max-w-5xl w-full shadow-2xl border border-gray-200 flex flex-col max-h-[92vh] animate-[fadeIn_.4s_ease]">
+            class="bg-white rounded-2xl max-w-5xl w-full shadow-2xl  flex flex-col max-h-[92vh] animate-[fadeIn_.4s_ease]">
             <div class="bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-4 flex items-center justify-between">
                 <h3 id="vetDiseaseModalTitle" class="text-white font-semibold text-lg flex items-center space-x-2">
                     <span class="inline-flex">
@@ -477,17 +470,7 @@
                     class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium transition">
                     Close
                 </button>
-                <a id="printVetDiseaseBtn" href="#"
-                    class="inline-flex items-center px-4 py-2 rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-700 text-sm font-medium transition">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0
-                        002 2h1v2a2 2 0 002 2h6a2 2 0
-                        002-2v-2h1a2 2 0 002-2V9a2 2 0
-                        00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0
-                        00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
-                    </svg>
-                    Print
-                </a>
+                
             </div>
         </div>
     </div>
@@ -496,7 +479,7 @@
     <div id="diseaseModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center px-4 py-8">
         <div
-            class="bg-white rounded-2xl w-full max-w-xl shadow-2xl border border-gray-200 overflow-hidden animate-[fadeIn_.35s_ease]">
+            class="bg-white rounded-2xl w-full max-w-xl shadow-2xl  overflow-hidden animate-[fadeIn_.35s_ease]">
             <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 flex items-center justify-between">
                 <h3 class="text-white font-semibold text-lg flex items-center">
                     <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" stroke-width="2"
@@ -580,7 +563,7 @@
     <div id="detectionModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center px-4 py-8 overflow-y-auto">
         <div
-            class="bg-white rounded-2xl max-w-5xl w-full shadow-2xl border border-gray-200 flex flex-col max-h-[92vh] animate-[fadeIn_.4s_ease]">
+            class="bg-white rounded-2xl max-w-5xl w-full shadow-2xl 0 flex flex-col max-h-[92vh] animate-[fadeIn_.4s_ease]">
             <div class="bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-4 flex items-center justify-between">
                 <h3 id="detectionModalTitle" class="text-white font-semibold text-lg flex items-center space-x-2">
                     <span>Loading...</span>
@@ -606,17 +589,7 @@
                     class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium transition">
                     Close
                 </button>
-                <a id="printDetectionBtn" href="#"
-                    class="inline-flex items-center px-4 py-2 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-medium transition">
-                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0
-                        002 2h1v2a2 2 0 002 2h6a2 2 0
-                        002-2v-2h1a2 2 0 002-2V9a2 2 0
-                        00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0
-                        00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
-                    </svg>
-                    Print
-                </a>
+                
             </div>
         </div>
     </div>
@@ -660,117 +633,138 @@
         }
 
         function openDetectionModal(id) {
-            const modal = document.getElementById('detectionModal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            document.body.classList.add('overflow-hidden');
+    const modal = document.getElementById('detectionModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.classList.add('overflow-hidden');
 
-            const content = document.getElementById('detectionModalContent');
-            const title = document.getElementById('detectionModalTitle');
-            const printBtn = document.getElementById('printDetectionBtn');
+    const content = document.getElementById('detectionModalContent');
+    const title = document.getElementById('detectionModalTitle');
+    
 
-            title.innerHTML = 'Loading...';
-            content.innerHTML = `<div class="flex items-center justify-center py-12">
-                <svg class="w-10 h-10 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
-                            stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-            </div>`;
+    title.innerHTML = 'Loading...';
+    content.innerHTML = `<div class="flex items-center justify-center py-12">
+        <svg class="w-10 h-10 animate-spin text-indigo-500" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"
+                    stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+        </svg>
+    </div>`;
 
-            fetch(`/pet/{{ $pet->id }}/disease/${id}/details`, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    }
-                })
-                .then(r => r.json())
-                .then(data => {
-                    title.innerHTML = `Detection Results: ${data.primary_diagnosis}`;
-                    const confidence = (data.confidence_score * 100).toFixed(1);
-                    let barColor = 'bg-green-600';
-                    let headerColor = 'bg-green-100 text-green-800';
-                    if (data.confidence_score > 0.7) {
-                        barColor = 'bg-red-600';
-                        headerColor = 'bg-red-100 text-red-800';
-                    } else if (data.confidence_score > 0.3) {
-                        barColor = 'bg-yellow-600';
-                        headerColor = 'bg-yellow-100 text-yellow-800';
-                    }
-                    const created = new Date(data.created_at).toLocaleString();
+    fetch(`/pet/{{ $pet->id }}/disease/${id}/details`, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(r => r.json())
+        .then(data => {
+            // Map short class names to full class names
+            const classNameMap = {
+                'Hypersensivi...': 'Hypersensivity Allergic dermatosis',
+                'Fungal Infec...': 'Fungal Infections',
+                'Bacterial de...': 'Bacterial dermatosis',
+                'Healthy': 'Healthy'
+            };
 
-                    const isSmall = window.innerWidth < 768;
-                    const layout = isSmall ? 'flex flex-col space-y-8' : 'grid md:grid-cols-5 gap-8';
+            // Get full name for primary diagnosis
+            let primaryDiagnosis = data.primary_diagnosis;
+            if (classNameMap[primaryDiagnosis]) {
+                primaryDiagnosis = classNameMap[primaryDiagnosis];
+            }
 
-                    content.innerHTML = `
-                        <div class="${layout}">
-                            <div class="${isSmall ? '' : 'md:col-span-2'}">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-2">Uploaded Image</h4>
-                                <div class="rounded-xl overflow-hidden bg-gray-100 border border-gray-200">
-                                    <img src="${data.image_url}" alt="Detection image" class="w-full h-auto object-contain max-h-80">
-                                </div>
-                                <p class="text-xs text-gray-500 mt-2">Uploaded: ${created}</p>
-                                <div class="mt-5 p-4 rounded-xl ${headerColor} shadow">
-                                    <p class="text-xs font-semibold uppercase tracking-wide mb-1">Primary Diagnosis</p>
-                                    <div class="flex items-center justify-between mb-2">
-                                        <span class="text-lg font-bold">${data.primary_diagnosis}</span>
-                                        <span class="text-sm font-semibold">${confidence}%</span>
-                                    </div>
-                                    <div class="w-full h-2.5 bg-white/60 rounded-full overflow-hidden">
-                                        <div class="h-2.5 ${barColor} rounded-full" style="width:${confidence}%"></div>
-                                    </div>
-                                </div>
+            title.innerHTML = `Detection Results: ${primaryDiagnosis}`;
+            const confidence = (data.confidence_score * 100).toFixed(1);
+            let barColor = 'bg-green-600';
+            let headerColor = 'bg-green-100 text-green-800';
+            if (data.confidence_score > 0.7) {
+                barColor = 'bg-red-600';
+                headerColor = 'bg-red-100 text-red-800';
+            } else if (data.confidence_score > 0.3) {
+                barColor = 'bg-yellow-600';
+                headerColor = 'bg-yellow-100 text-yellow-800';
+            }
+            const created = new Date(data.created_at).toLocaleString();
+
+            const isSmall = window.innerWidth < 768;
+            const layout = isSmall ? 'flex  flex-col space-y-8' : 'grid md:grid-cols-5 gap-8';
+
+            content.innerHTML = `
+                <div class="${layout} ">
+                    <div class="${isSmall ? '' : 'md:col-span-2'}">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Uploaded Image</h4>
+                        <div class="rounded-xl overflow-hidden bg-gray-100 ">
+                            <img src="${data.image_url}" alt="Detection image" class="w-full h-auto object-cover max-h-80">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Uploaded: ${created}</p>
+                        <div class="mt-5 p-4 rounded-xl ${headerColor} shadow">
+                            <p class="text-xs font-semibold uppercase tracking-wide mb-1">Primary Diagnosis</p>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-lg font-bold">${primaryDiagnosis}</span>
+                                <span class="text-sm font-semibold">${confidence}%</span>
                             </div>
-                            <div class="${isSmall ? '' : 'md:col-span-3'}">
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Detailed Probabilities</h4>
-                                <div class="space-y-3 mb-6">
-                                    ${data.results.map(r => {
-                                        const pct = (r.probability * 100).toFixed(1);
-                                        let rc = 'bg-green-100 text-green-800';
-                                        let bc = 'bg-green-600';
-                                        if (r.probability > 0.7) { rc = 'bg-red-100 text-red-800'; bc = 'bg-red-600'; }
-                                        else if (r.probability > 0.3) { rc = 'bg-yellow-100 text-yellow-800'; bc = 'bg-yellow-600'; }
-                                        return `
-                                            <div class="p-3 rounded-lg ${rc} shadow">
-                                                <div class="flex items-center justify-between mb-1">
-                                                    <span class="font-medium text-sm">${r.className}</span>
-                                                    <span class="text-xs font-semibold">${pct}%</span>
-                                                </div>
-                                                <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden">
-                                                    <div class="h-2 ${bc}" style="width:${pct}%"></div>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                                <h4 class="text-sm font-semibold text-gray-700 mb-3">Recommendations</h4>
-                                <div class="rounded-xl bg-blue-50 border border-blue-200 p-4 text-sm leading-relaxed text-blue-900">
-                                    ${data.recommendation_html || `
-                                            <p class="mb-2">Consult your veterinarian to confirm these AI-generated findings.</p>
-                                            <ul class="list-disc pl-5 space-y-1">
-                                                <li>Monitor symptoms progression</li>
-                                                <li>Prepare medical history for vet</li>
-                                                <li>Schedule a follow-up scan if condition changes</li>
-                                            </ul>
-                                        `}
-                                </div>
-                                <div class="mt-6 pt-5 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
-                                    <span>ID: #${data.id}</span>
-                                    <span>Confidence: ${confidence}%</span>
-                                </div>
+                            <div class="w-full h-2.5 bg-white/60 rounded-full overflow-hidden">
+                                <div class="h-2.5 ${barColor} rounded-full" style="width:${confidence}%"></div>
                             </div>
                         </div>
-                    `;
-                    printBtn.href = `/pet/${data.pet_id}/disease/${data.id}`;
-                })
-                .catch(() => {
-                    content.innerHTML = `
-                        <div class="p-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
-                            Failed to load detection details. Please try again.
-                        </div>`;
-                });
-        }
+                    </div>
+                    <div class="${isSmall ? '' : 'md:col-span-3'}">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Detailed Probabilities</h4>
+                        <div class="space-y-3 mb-6">
+                            ${data.results.map(r => {
+                                const pct = (r.probability * 100).toFixed(1);
+                                let rc = 'bg-green-100 text-green-800';
+                                let bc = 'bg-green-600';
+                                if (r.probability > 0.7) { rc = 'bg-red-100 text-red-800'; bc = 'bg-red-600'; }
+                                else if (r.probability > 0.3) { rc = 'bg-yellow-100 text-yellow-800'; bc = 'bg-yellow-600'; }
+                                
+                                // Get full class name
+                                let className = r.className;
+                                if (classNameMap[className]) {
+                                    className = classNameMap[className];
+                                }
+                                
+                                return `
+                                    <div class="p-3 rounded-lg ${rc} shadow">
+                                        <div class="flex items-center justify-between mb-1">
+                                            <span class="font-medium text-sm">${className}</span>
+                                            <span class="text-xs font-semibold">${pct}%</span>
+                                        </div>
+                                        <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden">
+                                            <div class="h-2 ${bc}" style="width:${pct}%"></div>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                        <h4 class="text-sm font-semibold text-gray-700 mb-3">Recommendations</h4>
+                        <div class="rounded-xl bg-blue-50 border border-blue-200 p-4 text-sm leading-relaxed text-blue-900">
+                            ${data.recommendation_html || `
+                                    <p class="mb-2">Consult your veterinarian to confirm these AI-generated findings.</p>
+                                    <ul class="list-disc pl-5 space-y-1">
+                                        <li>Monitor symptoms progression</li>
+                                        <li>Prepare medical history for vet</li>
+                                        <li>Schedule a follow-up scan if condition changes</li>
+                                    </ul>
+                                `}
+                        </div>
+                        <div class="mt-6 pt-5 border-t border-gray-200 flex items-center justify-between text-xs text-gray-500">
+                            <span>ID: #${data.id}</span>
+                            <span>Confidence: ${confidence}%</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+        })
+        .catch(() => {
+            content.innerHTML = `
+                <div class="p-6 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm">
+                    Failed to load detection details. Please try again.
+                </div>`;
+        });
+}
 
         function closeDetectionModal() {
             const modal = document.getElementById('detectionModal');
@@ -882,7 +876,7 @@
                             </div>
                         </div>
                     `;
-                    printBtn.href = `/pet/${data.pet_id}/vet-disease/${data.id}/print`;
+                    
                 })
                 .catch(() => {
                     content.innerHTML = `
