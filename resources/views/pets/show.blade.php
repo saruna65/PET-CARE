@@ -697,7 +697,7 @@
                     const layout = isSmall ? 'flex  flex-col space-y-8' : 'grid md:grid-cols-5 gap-8';
 
                     content.innerHTML = `
-                <div class="${layout} ">
+                <div class="${layout}">
                     <div class="${isSmall ? '' : 'md:col-span-2'}">
                         <h4 class="text-sm font-semibold text-gray-700 mb-2">Uploaded Image</h4>
                         <div class="rounded-xl overflow-hidden bg-gray-100 ">
@@ -731,25 +731,15 @@
                                     className = classNameMap[className];
                                 }
                                 
-                                return ` <
-                        div class = "p-3 rounded-lg ${rc} shadow" >
-                        <
-                        div class = "flex items-center justify-between mb-1" >
-                        <
-                        span class = "font-medium text-sm" > $ {
-                            className
-                        } < /span> <
-                        span class = "text-xs font-semibold" > $ {
-                            pct
-                        } % < /span> <
-                        /div> <
-                        div class = "w-full h-2 bg-white/60 rounded-full overflow-hidden" >
-                        <
-                        div class = "h-2 ${bc}"
-                    style = "width:${pct}%" > < /div> <
-                        /div> <
-                        /div>
-                    `;
+                                return `<div class="p-3 rounded-lg ${rc} shadow">
+    <div class="flex items-center justify-between mb-1">
+        <span class="font-medium text-sm">${className}</span>
+        <span class="text-xs font-semibold">${pct}%</span>
+    </div>
+    <div class="w-full h-2 bg-white/60 rounded-full overflow-hidden">
+        <div class="h-2 ${bc}" style="width:${pct}%"></div>
+    </div>
+</div>`;
                             }).join('')}
                         </div>
                         <h4 class="text-sm font-semibold text-gray-700 mb-3">Recommendations</h4>
