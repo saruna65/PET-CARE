@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout>  <!-- admin dashboard-->
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Dashboard') }}
@@ -7,263 +7,225 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
+            @if(auth()->user()->isAdmin())
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                <div class="p-6">
+                    <h3 class="text-lg font-medium text-gray-800 mb-4">Admin Quick Actions</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        
 
-                    <div class="mt-6">
-                        <h3 class="text-lg font-medium text-gray-900">Image Recognition</h3>
-                        <div class="mt-3">
-                            <input type="file" id="imageUpload" accept="image/*" class="mb-4">
-                            <button type="button" id="predictButton"
-                                class="px-4 py-2 bg-blue-600 text-white rounded-md disabled:bg-blue-300" disabled>
-                                Analyze Image
-                            </button>
 
-                            <div class="mt-4">
-                                <div id="imagePreview" class="mt-2" style="max-width: 300px; max-height: 300px;">
-                                </div>
-                                <div id="label-container" class="mt-4"></div>
-                                <div id="loading" class="hidden mt-4">Analyzing image...</div>
+                        <a href="{{ route('pets.index') }}" class="flex flex-col items-center justify-center p-4 bg-amber-50 rounded-lg hover:bg-amber-100 transition-colors">
+                            <svg class="h-8 w-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                            <span class="mt-2 text-sm font-medium text-gray-700">View Pets</span>
+                        </a>
 
-                                <!-- Recommendations Section -->
-                                <div id="recommendations-container" class="mt-6 hidden">
-                                    <h4 class="text-lg font-medium text-gray-800">Recommendations</h4>
-                                    <div id="recommendation-content" class="mt-2 p-4 border rounded-lg bg-blue-50">
-                                    </div>
-                                </div>
-                            </div>
+                        <a href="{{ route('become.vet.form') }}" class="flex flex-col items-center justify-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors">
+                            <svg class="h-8 w-8 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <span class="mt-2 text-sm font-medium text-gray-700">Register Vet</span>
+                        </a>
+
+                        <a href="{{ route('vet.index') }}" class="flex flex-col items-center justify-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-colors">
+                            <svg class="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            <span class="mt-2 text-sm font-medium text-gray-700">Manage Vets</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endif
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <div class="text-3xl font-bold">{{ \App\Models\User::count() }}</div>
+                        <div class="text-sm text-gray-500">Total Users</div>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <div class="text-3xl font-bold">{{ \App\Models\Pet::count() }}</div>
+                        <div class="text-sm text-gray-500">Registered Pets</div>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <div class="text-3xl font-bold">{{ \App\Models\Vet::count() }}</div>
+                        <div class="text-sm text-gray-500">Registered Vets</div>
+                    </div>
+                </div>
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <div class="text-3xl font-bold">{{ \App\Models\DiseaseDetection::count() ?? 0 }}</div>
+                        <div class="text-sm text-gray-500">Disease Detections</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Recent Pets -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <h3 class="text-lg font-medium mb-4">Recent Pets</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Owner</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Registered</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach(\App\Models\Pet::with('user')->latest()->take(5)->get() as $pet)
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $pet->pet_name }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $pet->pet_type }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $pet->user->name }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $pet->created_at->diffForHumans() }}</td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{{ route('pets.index') }}" class="text-sm text-blue-600 hover:underline">View all pets →</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Vets -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <h3 class="text-lg font-medium mb-4">Recent Vets</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Clinic</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Available</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @foreach(\App\Models\Vet::with('user')->latest()->take(5)->get() as $vet)
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $vet->user->name }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $vet->clinic_name }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $vet->specialization }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full {{ $vet->is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                                {{ $vet->is_available ? 'Yes' : 'No' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4">
+                            <a href="{{ route('vet.index') }}" class="text-sm text-blue-600 hover:underline">View all vets →</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pet Type Distribution -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <h3 class="text-lg font-medium mb-4">Pet Type Distribution</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pet Type</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @php
+                                        $totalPets = \App\Models\Pet::count();
+                                        $petTypes = \App\Models\Pet::select('pet_type')
+                                            ->selectRaw('count(*) as count')
+                                            ->groupBy('pet_type')
+                                            ->orderByDesc('count')
+                                            ->take(5)
+                                            ->get();
+                                    @endphp
+                                    
+                                    @foreach($petTypes as $type)
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $type->pet_type }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $type->count }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <span class="mr-2">{{ round(($type->count / $totalPets) * 100, 1) }}%</span>
+                                                <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                                                    <div class="bg-blue-600 h-2.5 rounded-full" style="width: {{ ($type->count / $totalPets) * 100 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vet Specialization Distribution -->
+                <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-900">
+                        <h3 class="text-lg font-medium mb-4">Vet Specializations</h3>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead>
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialization</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Count</th>
+                                        <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Percentage</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @php
+                                        $totalVets = \App\Models\Vet::count();
+                                        $vetSpecs = \App\Models\Vet::select('specialization')
+                                            ->selectRaw('count(*) as count')
+                                            ->groupBy('specialization')
+                                            ->orderByDesc('count')
+                                            ->take(5)
+                                            ->get();
+                                    @endphp
+                                    
+                                    @foreach($vetSpecs as $spec)
+                                    <tr>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $spec->specialization }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">{{ $spec->count }}</td>
+                                        <td class="px-4 py-2 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <span class="mr-2">{{ round(($spec->count / $totalVets) * 100, 1) }}%</span>
+                                                <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                                                    <div class="bg-green-600 h-2.5 rounded-full" style="width: {{ ($spec->count / $totalVets) * 100 }}%"></div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-    <script type="text/javascript">
-        // The link to your model provided by Teachable Machine export panel
-        const URL = "https://teachablemachine.withgoogle.com/models/9nk8R6Zfk/";
-        let model, maxPredictions;
-        let imageDisplay = null;
-        let modelLoaded = false;
-        const imageUpload = document.getElementById('imageUpload');
-        const predictButton = document.getElementById('predictButton');
-        const imagePreview = document.getElementById('imagePreview');
-        const labelContainer = document.getElementById('label-container');
-        const loadingIndicator = document.getElementById('loading');
-        const recommendationsContainer = document.getElementById('recommendations-container');
-        const recommendationContent = document.getElementById('recommendation-content');
-
-        // Recommendation database
-        const recommendations = {
-            "Hypersensivity Allergic dermatosis": `
-                <div class="text-red-800 font-medium mb-2">Hypersensitivity/Allergic Dermatosis Detected</div>
-                <p class="mb-2">Your pet appears to have signs of allergic dermatosis. Here are some recommendations:</p>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>Schedule a veterinary visit as soon as possible to confirm diagnosis</li>
-                    <li>Try to identify and remove potential allergens from your pet's environment</li>
-                    <li>Consider hypoallergenic pet food recommended by your veterinarian</li>
-                    <li>Avoid using harsh chemical cleaners around your home</li>
-                    <li>Regular bathing with vet-recommended medicated shampoo may help</li>
-                    <li>Do not use human medications without veterinary guidance</li>
-                </ul>
-            `,
-            "Fungal Infections": `
-                <div class="text-red-800 font-medium mb-2">Fungal Infection Detected</div>
-                <p class="mb-2">Your pet appears to have signs of a fungal infection. Here are some recommendations:</p>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>Visit your veterinarian for proper diagnosis and treatment</li>
-                    <li>Keep the affected areas clean and dry</li>
-                    <li>Your vet may prescribe antifungal medications, shampoos or creams</li>
-                    <li>Follow the complete treatment course, even if symptoms improve</li>
-                    <li>Disinfect bedding, brushes and other items your pet frequently uses</li>
-                    <li>Some fungal infections can spread to humans, so practice good hygiene</li>
-                    <li>Consider isolating your pet from other animals until the infection clears</li>
-                </ul>
-            `,
-            "Bacterial dermatosis": `
-                <div class="text-red-800 font-medium mb-2">Bacterial Dermatosis Detected</div>
-                <p class="mb-2">Your pet appears to have signs of bacterial skin infection. Here are some recommendations:</p>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>Consult with your veterinarian for proper diagnosis and treatment</li>
-                    <li>Antibiotics are typically needed and must be prescribed by a professional</li>
-                    <li>Keep the affected area clean using a gentle antiseptic solution recommended by your vet</li>
-                    <li>Prevent your pet from scratching, licking, or biting the affected areas</li>
-                    <li>Complete the full course of antibiotics even if symptoms improve</li>
-                    <li>Check for underlying causes like allergies or parasites</li>
-                    <li>Regular bathing with medicated shampoos may be recommended</li>
-                </ul>
-            `,
-            "Healthy": `
-                <div class="text-green-800 font-medium mb-2">No Issues Detected - Healthy Skin</div>
-                <p class="mb-2">Great news! Your pet's skin appears healthy. Here are some tips to maintain skin health:</p>
-                <ul class="list-disc pl-5 space-y-1">
-                    <li>Continue regular grooming and bathing with pet-appropriate products</li>
-                    <li>Maintain a balanced diet with proper nutrition</li>
-                    <li>Schedule regular check-ups with your veterinarian</li>
-                    <li>Use parasite prevention as recommended by your vet</li>
-                    <li>Monitor for any changes in skin appearance or behavior</li>
-                    <li>Provide fresh water and a clean living environment</li>
-                </ul>
-            `
-        };
-
-        // Initialize the model
-        async function init() {
-            // Load model
-            loadingIndicator.classList.remove('hidden');
-            loadingIndicator.textContent = 'Loading model...';
-            const modelURL = URL + "model.json";
-            const metadataURL = URL + "metadata.json";
-
-            try {
-                model = await tmImage.load(modelURL, metadataURL);
-                maxPredictions = model.getTotalClasses();
-
-                // Clear and create label elements properly
-                labelContainer.innerHTML = '';
-                for (let i = 0; i < maxPredictions; i++) {
-                    const element = document.createElement("div");
-                    element.className = "prediction-item"; // Add a class for styling
-                    labelContainer.appendChild(element);
-                }
-
-                // Set model loaded flag
-                modelLoaded = true;
-                console.log("Model loaded successfully");
-
-                // Enable predict button if image is already uploaded
-                if (imageDisplay) {
-                    predictButton.disabled = false;
-                }
-
-                loadingIndicator.classList.add('hidden');
-            } catch (error) {
-                console.error('Error loading model:', error);
-                loadingIndicator.textContent = 'Error loading model. Please try again later.';
-                loadingIndicator.classList.add('text-red-500');
-            }
-        }
-
-        // Predict function for uploaded image
-        async function predict() {
-            if (!model || !imageDisplay) {
-                console.error("Model or image not ready");
-                return;
-            }
-
-            loadingIndicator.textContent = "Analyzing image...";
-            loadingIndicator.classList.remove('hidden');
-            predictButton.disabled = true;
-
-            // Hide recommendations while processing
-            recommendationsContainer.classList.add('hidden');
-
-            try {
-                // Run prediction on the displayed image
-                const predictions = await model.predict(imageDisplay);
-
-                // Make sure the label container has the correct number of children
-                if (labelContainer.children.length !== maxPredictions) {
-                    labelContainer.innerHTML = '';
-                    for (let i = 0; i < maxPredictions; i++) {
-                        const element = document.createElement("div");
-                        element.className = "prediction-item";
-                        labelContainer.appendChild(element);
-                    }
-                }
-
-                // Find the highest probability prediction
-                let highestProb = 0;
-                let highestProbClass = "";
-
-                // Display results - use children instead of childNodes
-                for (let i = 0; i < maxPredictions; i++) {
-                    const classPrediction =
-                        predictions[i].className + ": " +
-                        (predictions[i].probability * 100).toFixed(2) + "%";
-
-                    // Use children instead of childNodes to avoid text nodes
-                    labelContainer.children[i].innerHTML = classPrediction;
-
-                    // Add styling based on probability
-                    const prob = predictions[i].probability;
-                    labelContainer.children[i].className =
-                        "prediction-item py-1 px-2 my-1 rounded " +
-                        (prob > 0.7 ? "bg-green-100" :
-                            prob > 0.3 ? "bg-yellow-100" : "bg-gray-100");
-
-                    // Track highest probability for recommendations
-                    if (prob > highestProb) {
-                        highestProb = prob;
-                        highestProbClass = predictions[i].className;
-                    }
-                }
-
-                // Show recommendations based on highest probability class
-                if (highestProb > 0.5) { // Only show recommendations if we're reasonably confident
-                    recommendationContent.innerHTML = recommendations[highestProbClass] ||
-                        '<p>No specific recommendations available. Please consult your veterinarian.</p>';
-                    recommendationsContainer.classList.remove('hidden');
-                }
-
-                console.log("Prediction completed successfully");
-            } catch (error) {
-                console.error('Prediction error:', error);
-                labelContainer.innerHTML = '<div class="text-red-500">Error analyzing image: ' + error.message +
-                    '</div>';
-            } finally {
-                loadingIndicator.classList.add('hidden');
-                predictButton.disabled = false;
-            }
-        }
-
-        // Handle file selection
-        imageUpload.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Clear previous results
-            labelContainer.innerHTML = '';
-            recommendationsContainer.classList.add('hidden');
-
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                // Create and display the image
-                imagePreview.innerHTML = '';
-                imageDisplay = document.createElement('img');
-                imageDisplay.src = event.target.result;
-                imageDisplay.style.maxWidth = '100%';
-                imageDisplay.style.maxHeight = '300px';
-
-                // Make sure image is fully loaded before using it for prediction
-                imageDisplay.onload = function() {
-                    console.log("Image fully loaded");
-                };
-
-                imagePreview.appendChild(imageDisplay);
-
-                // Only enable the predict button if the model is loaded
-                if (modelLoaded) {
-                    console.log("Image loaded and model is ready");
-                    predictButton.disabled = false;
-                } else {
-                    console.log("Image loaded but waiting for model");
-                    loadingIndicator.textContent = "Image loaded. Waiting for model to complete loading...";
-                    loadingIndicator.classList.remove('hidden');
-                }
-            };
-            reader.readAsDataURL(file);
-        });
-
-        // Add event listener to predict button
-        predictButton.addEventListener('click', predict);
-
-        // Start model initialization immediately
-        init();
-    </script>
-
 </x-app-layout>

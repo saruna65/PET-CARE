@@ -2,9 +2,9 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-// Add this line to import your PetController
 use App\Http\Controllers\PetController;
 use App\Http\Controllers\VetController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -12,7 +12,9 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -29,24 +31,53 @@ Route::middleware('auth')->group(function () {
     Route::get('/pet/show/{id}', [PetController::class, 'show'])->name('pet.show');
     Route::post('/pet/{id}/disease/analyze', [PetController::class, 'analyzeDisease'])->name('disease.analyze');
     Route::get('/pet/{petId}/disease/{detectionId}/details', [PetController::class, 'getDetectionDetails'])->name('disease.details');
-    
+
+    Route::get('/pets/detail/{pet}', [DashboardController::class, 'details'])->name('pet.details');
+    Route::get('/pets/list', [DashboardController::class, 'index'])->name('pets.index');
+
+    // Add this route inside the middleware('auth')->group(function ()
+    Route::get('/pet/{petId}/vet-disease/{diseaseId}/details', [PetController::class, 'getVetDiseaseDetails'])->name('vet-disease.details');
+    Route::get('/pet/{petId}/vet-disease/{diseaseId}/print', [PetController::class, 'printVetDisease'])->name('vet-disease.print');
+    // Vet routes
     Route::prefix('vets')->group(function () {
-    Route::get('/', [VetController::class, 'index'])->name('vet.index');
-    Route::get('/create', [VetController::class, 'create'])->name('vet.create')->middleware('auth');
-    Route::post('/', [VetController::class, 'store'])->name('vet.store')->middleware('auth');
-    Route::get('/{id}', [VetController::class, 'show'])->name('vet.show');
-    Route::get('/{id}/edit', [VetController::class, 'edit'])->name('vet.edit')->middleware('auth');
-    Route::put('/{id}', [VetController::class, 'update'])->name('vet.update')->middleware('auth');
-    Route::delete('/{id}', [VetController::class, 'destroy'])->name('vet.destroy')->middleware('auth');
-    // Vet registration routes
+        // Public vet routes (accessible to all authenticated users)
+        Route::get('/', [VetController::class, 'index'])->name('vet.index');
+        Route::get('/{id}', [VetController::class, 'show'])->name('vet.show');
+
+        // Routes for regular users to register as vets
         Route::get('/register/form', [VetController::class, 'registerForm'])->name('become.vet.form');
         Route::post('/register/submit', [VetController::class, 'registerSubmit'])->name('become.vet.submit');
     });
-    
 
-    Route::middleware('role:vet')->group(function() {
-        
+    // Inside your vet middleware group
+    Route::middleware('role:vet')->group(function () {
+        Route::get('/vet/dashboard', [VetController::class, 'dashboard'])->name('vet.dashboard');
+        Route::get('/vet/profile/edit', [VetController::class, 'editProfile'])->name('vet.edit.profile');
+        Route::post('/vet/profile/update', [VetController::class, 'updateProfile'])->name('vet.update.profile');
+
+        // Add these new routes for the vet diseases functionality
+        Route::get('/vet/diseases', [VetController::class, 'allDiseases'])->name('vet.diseases');
+        Route::get('/vet/disease/{id}', [VetController::class, 'getDiseaseDetails'])->name('vet.disease-details');
+        Route::post('/vet/disease/{id}/review', [VetController::class, 'markDiseaseReviewed'])->name('vet.mark-reviewed');
+        // New routes for detailed disease view and review submission
+        Route::get('/vet/disease/{id}/view', [VetController::class, 'viewDisease'])->name('vet.disease.view');
+        Route::post('/vet/disease/{id}/submit-review', [VetController::class, 'submitReview'])->name('vet.disease.submit-review');
     });
+
+    // Admin-only routes
+    Route::middleware('role:admin')
+        ->prefix('admin')
+        ->group(function () {
+            Route::get('/vets/create', [VetController::class, 'create'])->name('vet.create');
+            Route::post('/vets', [VetController::class, 'store'])->name('vet.store');
+            Route::get('/vets/{id}/edit', [VetController::class, 'edit'])->name('vet.edit');
+            Route::put('/vets/{id}', [VetController::class, 'update'])->name('vet.update');
+            Route::delete('/vets/{id}', [VetController::class, 'destroy'])->name('vet.destroy');
+
+            // Create new user and vet profile together (admin only)
+            Route::get('/vets/create-with-user', [VetController::class, 'createWithUser'])->name('vet.create.with.user');
+            Route::post('/vets/store-with-user', [VetController::class, 'storeWithUser'])->name('vet.store.with.user');
+        });
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

@@ -1,4 +1,5 @@
-<x-app-layout>
+
+<x-app-layout><!-- pet -image upload - review results -->
     <div class="py-12 bg-gradient-to-b from-blue-50 to-white">
         <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
             <!-- Back Button -->
@@ -77,12 +78,25 @@
                                             $colorClass = 'bg-green-100 text-green-800';
                                             $barColor = 'bg-green-600';
                                         }
+                                        
+                                        // Map short class names to full class names
+                                        $fullClassName = $prediction['className'];
+                                        $classNameMap = [
+                                            'Hypersensivi...' => 'Hypersensivity Allergic dermatosis',
+                                            'Fungal Infec...' => 'Fungal Infections',
+                                            'Bacterial de...' => 'Bacterial dermatosis',
+                                            'Healthy' => 'Healthy'
+                                        ];
+                                        
+                                        if (array_key_exists($prediction['className'], $classNameMap)) {
+                                            $fullClassName = $classNameMap[$prediction['className']];
+                                        }
                                     @endphp
                                     
                                     <div class="p-4 rounded-lg {{ $colorClass }}">
-                                        <div class="flex justify-between items-center mb-1">
-                                            <span class="font-medium">{{ $prediction['className'] }}</span>
-                                            <span class="text-sm font-bold">{{ number_format($probability, 1) }}%</span>
+                                        <div class="flex justify-between items-start mb-1">
+                                            <span class="font-medium">{{ $fullClassName }}</span>
+                                            <span class="text-sm font-bold ml-2 flex-shrink-0">{{ number_format($probability, 1) }}%</span>
                                         </div>
                                         <div class="w-full bg-white/60 rounded-full h-3">
                                             <div class="h-3 rounded-full {{ $barColor }}" style="width: {{ $probability }}%"></div>
@@ -118,6 +132,26 @@
                         </div>
                     </div>
                     
+                    <!-- Add this right after the Recommendations Section, before Action Buttons -->
+                    @if(isset($sentToVet) && $sentToVet)
+                        <div class="mt-8 pt-6 border-t border-gray-200">
+                            <div class="bg-indigo-50 border-l-4 border-indigo-500 p-5 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-indigo-600 mr-3" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
+                                        <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm9.707 5.707a1 1 0 00-1.414-1.414L9 12.586l-1.293-1.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-indigo-800 font-medium text-lg">Sent to Veterinarians</h3>
+                                        <p class="text-indigo-600">This case has been sent to our veterinarian network for review.</p>
+                                        @if(isset($detectionReason))
+                                            <p class="text-indigo-600 mt-1 text-sm"><strong>Reason:</strong> {{ $detectionReason }}</p>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                     <!-- Action Buttons -->
                     <div class="mt-8 flex flex-wrap gap-4 justify-between">
                         <a href="{{ route('pet.show', $pet->id) }}" class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg transition duration-300">
@@ -132,13 +166,6 @@
                                 <path fill-rule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clip-rule="evenodd" />
                             </svg>
                             Print Results
-                        </button>
-                        
-                        <button type="button" onclick="openDiseaseModal()" class="inline-flex items-center px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow-md transition duration-300">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
-                            </svg>
-                            Try Another Image
                         </button>
                     </div>
                 </div>

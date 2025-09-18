@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout><!-- admin manage vets -->
     <div class="py-12 bg-gradient-to-b from-blue-50 to-white">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="mb-8">
@@ -47,11 +47,11 @@
 
             @if(auth()->check() && !auth()->user()->isVet())
                 <div class="mb-8">
-                    <a href="{{ route('vet.create') }}" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <a href="{{ route('become.vet.form') }}" class="inline-flex items-center justify-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
                             <path fill-rule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clip-rule="evenodd" />
                         </svg>
-                        Register as a Veterinarian
+                        Register Veterinarian
                     </a>
                 </div>
             @endif

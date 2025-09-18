@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout><!-- login pet owner - pet profiles -->
     <div class="py-12 bg-gradient-to-b from-blue-50 to-white">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <!-- Header Section -->
